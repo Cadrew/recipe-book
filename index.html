@@ -5,217 +5,378 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <title>Mes recettes personnelles — Bon anniversaire</title>
-  <meta name="description" content="Une petite page cadeau : bon anniversaire + lecture du livre de recettes en version flipbook." />
+  <meta name="description" content="Une page cadeau (style landing/portfolio) + un lecteur pour feuilleter le livre de recettes." />
 
-  <!-- Fonts (matching the book's classy / cozy vibe) -->
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Swiper (gallery) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Libs -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+  <!-- Animations / QR -->
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <meta property="og:title" content="Mes recettes personnelles — Bon anniversaire" />
-  <meta property="og:description" content="Lecture du livre en flipbook + une petite surprise à l’arrivée 😄" />
+  <meta property="og:description" content="Un petit cadeau : un livre de recettes à feuilleter en ligne." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/cover.jpg" />
 </head>
 
-<body>
-  <div class="noise"></div>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-orb orb-3"></div>
+<body class="is-loading">
+  <!-- Decorative background -->
+  <div class="bg">
+    <div class="bg__grid"></div>
+    <div class="bg__orbs orb--a"></div>
+    <div class="bg__orbs orb--b"></div>
+    <div class="bg__orbs orb--c"></div>
+    <div class="bg__noise"></div>
+  </div>
 
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="Retour en haut">
-      <span class="brand__mark">🍷</span>
-      <span class="brand__text">
-        <span class="brand__title">Mes recettes personnelles</span>
-        <span class="brand__subtitle">A family recipe book</span>
-      </span>
-    </a>
+  <!-- Top nav -->
+  <header class="navwrap" id="top">
+    <div class="nav">
+      <a class="nav__brand" href="#top" aria-label="Retour en haut">
+        <span class="nav__mark"><i class="fa-solid fa-utensils"></i></span>
+        <span class="nav__brandText">
+          <span class="nav__brandTitle">Mes recettes personnelles</span>
+          <span class="nav__brandSub">A family recipe book</span>
+        </span>
+      </a>
 
-    <nav class="nav">
-      <a class="nav__link" href="#gift">Carte</a>
-      <a class="nav__link" href="#reader">Lire</a>
-      <a class="nav__link" href="#download">Télécharger</a>
-    </nav>
+      <nav class="nav__links" aria-label="Navigation">
+        <a href="#about">Le cadeau</a>
+        <a href="#chapters">À l’intérieur</a>
+        <a href="#gallery">Aperçu</a>
+        <a href="#cta">Lire</a>
+        <button class="nav__qr" id="btnQr" type="button" title="QR code de cette page">
+          <i class="fa-solid fa-qrcode"></i><span>QR</span>
+        </button>
+      </nav>
 
-    <div class="topbar__cta">
-      <button class="btn btn--ghost" id="btnQr" type="button" title="Afficher un QR code de cette page">QR</button>
-      <a class="btn btn--primary" href="#reader">Feuilleter</a>
+      <div class="nav__cta">
+        <a class="btn btn--ghost" id="readerLinkTop" href="reader.html">Feuilleter</a>
+        <a class="btn btn--primary" href="book.pdf" download>
+          <i class="fa-solid fa-download"></i><span>PDF</span>
+        </a>
+      </div>
+
+      <button class="nav__burger" id="burger" aria-label="Ouvrir le menu" type="button">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="navmobile" id="navmobile" aria-hidden="true">
+      <a href="#about" class="navmobile__link">Le cadeau</a>
+      <a href="#chapters" class="navmobile__link">À l’intérieur</a>
+      <a href="#gallery" class="navmobile__link">Aperçu</a>
+      <a href="#cta" class="navmobile__link">Lire</a>
+      <a href="reader.html" id="readerLinkMobile" class="btn btn--ghost navmobile__cta">Feuilleter</a>
+      <a class="btn btn--primary navmobile__cta" href="book.pdf" download><i class="fa-solid fa-download"></i><span>Télécharger</span></a>
+      <button class="btn btn--soft navmobile__cta" id="closeMobile" type="button">Fermer</button>
     </div>
   </header>
 
-  <main id="top">
-    <!-- HERO -->
-    <section class="hero" id="gift">
-      <div class="hero__inner">
-        <div class="hero__badge">
-          <span class="dot"></span>
-          <span id="heroKicker">Un petit cadeau en avance</span>
+  <!-- QR Modal -->
+  <div class="modal" id="qrModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="QR code">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel">
+      <div class="modal__head">
+        <div>
+          <h3>QR code</h3>
+          <p class="muted">Pratique pour une carte cadeau.</p>
         </div>
-
-        <h1 class="hero__title">
-          <span class="hero__script" id="heroTo">Bon anniversaire</span>
-          <span class="hero__block">🌿</span>
-        </h1>
-
-        <p class="hero__lead">
-          J’ai écrit un petit livre avec <strong>mes recettes préférées</strong> — celles que je refais tout le temps,
-          du comfort food aux desserts qui rendent accro.
-          <span class="muted">La version imprimée arrive un peu plus tard (merci l’imprimeur 😅)</span>
-          mais en attendant tu peux déjà <strong>le feuilleter ici</strong> comme un vrai livre.
-        </p>
-
-        <div class="hero__actions">
-          <a class="btn btn--primary" href="#reader">Ouvrir le livre</a>
-          <a class="btn btn--soft" href="#download">Télécharger le PDF</a>
-          <button class="btn btn--ghost" id="btnConfetti" type="button">🎉 Un peu de magie</button>
-        </div>
-
-        <div class="hero__cards">
-          <article class="card">
-            <div class="card__icon">🥘</div>
-            <div class="card__body">
-              <h3>Cozy mains</h3>
-              <p>Des plats doudous et de la cuisine qui sent bon (bistro vibes).</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card__icon">🍟</div>
-            <div class="card__body">
-              <h3>Weeknight comfort</h3>
-              <p>Des recettes efficaces (et un peu dangereuses), parfaites à partager.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card__icon">🍐</div>
-            <div class="card__body">
-              <h3>Sweet treats</h3>
-              <p>Des desserts à la fois simples et “wow”, avec plein de tips.</p>
-            </div>
-          </article>
-        </div>
-
-        <div class="hero__ribbon" aria-hidden="true">
-          <div class="ribbon">
-            <span>Édition imprimée — bientôt livrée</span>
-            <span class="ribbon__sep">•</span>
-            <span>En attendant : version digitale</span>
-          </div>
-        </div>
+        <button class="iconbtn" data-close aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
       </div>
-    </section>
-
-    <!-- QR MODAL -->
-    <div class="modal" id="qrModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="QR code">
-      <div class="modal__backdrop" data-close></div>
-      <div class="modal__panel">
-        <div class="modal__header">
-          <h2>QR code de cette page</h2>
-          <button class="iconbtn" data-close aria-label="Fermer">✕</button>
-        </div>
-        <p class="muted">Tu peux l’utiliser pour imprimer / coller sur une carte.</p>
-        <div class="qr" id="qrBox" aria-label="QR code"></div>
-        <p class="muted tiny">Astuce : si tu veux un message personnalisé, ajoute <code>?to=Prénom</code> dans l’URL.</p>
-      </div>
+      <div class="modal__qr" id="qrBox" aria-label="QR code"></div>
+      <p class="muted tiny">Astuce : ajoute <code>?to=Prénom</code> dans l’URL pour personnaliser le message.</p>
     </div>
+  </div>
 
-    <!-- READER -->
-    <section class="reader" id="reader">
-      <div class="section-title">
-        <h2>Feuilleter le livre</h2>
-        <p class="muted">Mode “livre” avec animation de pages, navigation, plein écran, et une option simple/double page.</p>
-      </div>
-
-      <div class="reader__frame">
-        <div class="reader__toolbar" role="toolbar" aria-label="Contrôles du livre">
-          <button class="tool" id="prevBtn" type="button" title="Page précédente (←)">←</button>
-          <button class="tool" id="nextBtn" type="button" title="Page suivante (→)">→</button>
-
-          <div class="toolgroup">
-            <span class="pill" id="pageLabel">Page —</span>
-            <input class="slider" id="pageSlider" type="range" min="0" max="1" value="0" step="1" aria-label="Aller à la page" />
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__inner">
+        <div class="hero__left">
+          <div class="kicker">
+            <span class="kicker__dot"></span>
+            <span id="heroKicker">Un cadeau maison, en avance</span>
           </div>
 
-          <div class="toolgroup">
-            <button class="tool" id="toggleLayout" type="button" title="Basculer simple/double page">📰</button>
-            <button class="tool" id="zoomOut" type="button" title="Zoom -">−</button>
-            <button class="tool" id="zoomIn" type="button" title="Zoom +">+</button>
-            <button class="tool" id="fullscreen" type="button" title="Plein écran">⛶</button>
+          <h1 class="hero__title">
+            <span class="hero__script" id="heroTo">Bon anniversaire</span>
+            <span class="hero__titleLine">✨</span>
+          </h1>
+
+          <p class="hero__lead">
+            J’ai écrit un petit livre avec <strong>mes recettes préférées</strong> — celles que je refais tout le temps,
+            du comfort food aux desserts “wow”.
+            <span class="hero__note">La version imprimée arrive un peu plus tard (l’imprimeur m’a trahi 😅), mais tu peux déjà le feuilleter ici.</span>
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" id="readerLinkHero" href="reader.html">
+              <i class="fa-solid fa-book-open"></i><span>Ouvrir le livre</span>
+            </a>
+            <a class="btn btn--ghost" href="#gallery">
+              <i class="fa-regular fa-images"></i><span>Aperçu</span>
+            </a>
+            <button class="btn btn--soft" id="btnConfetti" type="button">
+              <i class="fa-solid fa-wand-magic-sparkles"></i><span>Un peu de magie</span>
+            </button>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <div class="stat__num" id="pageCount">—</div>
+              <div class="stat__label">pages</div>
+            </div>
+            <div class="stat">
+              <div class="stat__num">A4</div>
+              <div class="stat__label">format</div>
+            </div>
+            <div class="stat">
+              <div class="stat__num">100%</div>
+              <div class="stat__label">fait maison</div>
+            </div>
           </div>
         </div>
 
-        <div class="reader__stage" id="readerStage">
-          <div class="loading" id="loading">
-            <div class="loading__spinner"></div>
-            <div class="loading__text">
-              <div class="loading__title">Préparation du livre…</div>
-              <div class="loading__subtitle" id="loadingSub">Chargement du PDF</div>
-              <div class="loading__bar">
-                <div class="loading__barFill" id="loadingBar"></div>
+        <div class="hero__right">
+          <div class="mock">
+            <div class="mock__glow"></div>
+            <div class="mock__card" id="tilt">
+              <img class="mock__img" src="assets/cover.jpg" alt="Couverture du livre" />
+              <div class="mock__shine"></div>
+              <div class="mock__badge">
+                <i class="fa-solid fa-seal-check"></i> édition digitale
               </div>
             </div>
           </div>
 
-          <div class="book-shell" id="bookShell">
-            <div id="book" class="book" aria-label="Livre"></div>
+          <div class="scrollHint">
+            <span class="scrollHint__mouse"></span>
+            <span class="scrollHint__text">Scroll</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__divider" aria-hidden="true">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path d="M0,80 C240,120 480,30 720,70 C960,110 1200,40 1440,80 L1440,120 L0,120 Z"></path>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="container grid2">
+        <div class="panel">
+          <div class="section__eyebrow">Le cadeau</div>
+          <h2 class="section__title">Un livre de recettes, comme un petit héritage</h2>
+          <p class="section__text">
+            L’idée, c’est simple : un recueil de recettes que j’aime vraiment, avec des explications claires,
+            des astuces, et cette vibe “on cuisine et on rigole”.
+          </p>
+          <ul class="bullets">
+            <li><i class="fa-solid fa-check"></i><span>Lecture en mode <strong>livre</strong> (page turn, double/single page)</span></li>
+            <li><i class="fa-solid fa-check"></i><span>Téléchargement du PDF pour imprimer ou garder</span></li>
+            <li><i class="fa-solid fa-check"></i><span>Version imprimée en route : <strong>arrive après</strong> 🎁</span></li>
+          </ul>
+
+          <div class="noteCard">
+            <div class="noteCard__icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div>
+              <div class="noteCard__title">Teasing “imprimeur”</div>
+              <div class="noteCard__text">Le PDF est déjà là. Le papier arrive bientôt (promis). 😄</div>
+            </div>
           </div>
         </div>
 
-        <div class="reader__hint muted tiny">
-          Astuces : clique sur un coin de page pour tourner • touches ← → • double-clic pour zoom • les premières pages se chargent d’abord, le reste en arrière-plan.
+        <div class="panel panel--glass">
+          <div class="quote">
+            <div class="quote__mark">“</div>
+            <div class="quote__body">
+              <div class="quote__title">Bon anniversaire !</div>
+              <p class="quote__text" id="giftText">
+                J’espère que ce livre te donnera envie de cuisiner des trucs bons, simples, et un peu dangereux.
+                Et surtout : qu’on en fasse ensemble.
+              </p>
+              <div class="quote__sig">— signé : moi 😇</div>
+            </div>
+          </div>
+
+          <div class="actionsRow">
+            <button class="btn btn--ghost" id="btnCopyLink" type="button"><i class="fa-regular fa-copy"></i><span>Copier le lien</span></button>
+            <button class="btn btn--soft" id="btnQr2" type="button"><i class="fa-solid fa-qrcode"></i><span>QR code</span></button>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- DOWNLOAD -->
-    <section class="download" id="download">
-      <div class="section-title">
-        <h2>Le PDF</h2>
-        <p class="muted">Si tu préfères : version classique à ouvrir dans un lecteur PDF, ou à imprimer.</p>
-      </div>
+    <!-- CHAPTERS -->
+    <section class="section section--alt" id="chapters">
+      <div class="container">
+        <div class="section__head">
+          <div class="section__eyebrow">À l’intérieur</div>
+          <h2 class="section__title">Une structure claire, comme un vrai livre</h2>
+          <p class="section__text">Quelques repères pour “feel” le contenu avant de plonger.</p>
+        </div>
 
-      <div class="download__card">
-        <div class="download__left">
-          <div class="download__title">Mes recettes personnelles</div>
-          <div class="download__meta">
-            <span class="tag">PDF</span>
-            <span class="tag" id="pageCountTag">— pages</span>
-            <span class="tag">A4</span>
+        <div class="timeline">
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__card">
+              <div class="timeline__title">Entrées &amp; petits plaisirs</div>
+              <div class="timeline__text">De quoi lancer un repas ou juste grignoter “pour goûter”.</div>
+            </div>
+          </div>
+
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__card">
+              <div class="timeline__title">Plats “doudou”</div>
+              <div class="timeline__text">Le genre de recettes qui réparent une journée (ou une semaine).</div>
+            </div>
+          </div>
+
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__card">
+              <div class="timeline__title">Desserts &amp; “wow factor”</div>
+              <div class="timeline__text">Simple, mais avec ce petit twist qui fait dire “ok, c’est sérieux”.</div>
+            </div>
+          </div>
+
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__card">
+              <div class="timeline__title">Notes &amp; astuces</div>
+              <div class="timeline__text">Des détails qui changent tout : cuisson, texture, timing, etc.</div>
+            </div>
           </div>
         </div>
-        <div class="download__right">
-          <a class="btn btn--primary" href="book.pdf" download>⬇ Télécharger</a>
-          <a class="btn btn--ghost" href="book.pdf" target="_blank" rel="noopener">↗ Ouvrir</a>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="section" id="gallery">
+      <div class="container">
+        <div class="section__head">
+          <div class="section__eyebrow">Aperçu</div>
+          <h2 class="section__title">Quelques pages pour se faire une idée</h2>
+          <p class="section__text">Clique pour agrandir, ou passe direct en mode lecture.</p>
+        </div>
+
+        <div class="gallery">
+          <div class="swiper" id="swiper">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide"><img src="assets/cover.jpg" alt="Couverture" /></div>
+              <div class="swiper-slide"><img src="assets/sample_10.jpg" alt="Aperçu page" /></div>
+              <div class="swiper-slide"><img src="assets/sample_25.jpg" alt="Aperçu page" /></div>
+              <div class="swiper-slide"><img src="assets/sample_3.jpg" alt="Aperçu page" /></div>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev" aria-label="Précédent"></div>
+            <div class="swiper-button-next" aria-label="Suivant"></div>
+          </div>
+
+          <div class="gallery__cta">
+            <div class="gallery__card">
+              <div class="gallery__title">Envie de le lire “comme un vrai livre” ?</div>
+              <div class="gallery__text">Le lecteur a une animation de pages, un mode 1 page / double page, zoom et plein écran.</div>
+              <div class="gallery__actions">
+                <a class="btn btn--primary" id="readerLinkGallery" href="reader.html"><i class="fa-solid fa-book-open"></i><span>Feuilleter</span></a>
+                <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span>PDF</span></a>
+              </div>
+            </div>
+
+            <div class="miniCards">
+              <div class="miniCard">
+                <i class="fa-solid fa-sparkles"></i>
+                <div>
+                  <div class="miniCard__title">Animations &amp; style</div>
+                  <div class="miniCard__text">Un rendu propre, pas juste un lien Dropbox.</div>
+                </div>
+              </div>
+              <div class="miniCard">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <div>
+                  <div class="miniCard__title">Responsive</div>
+                  <div class="miniCard__text">OK sur mobile, tablette, desktop.</div>
+                </div>
+              </div>
+              <div class="miniCard">
+                <i class="fa-solid fa-lock"></i>
+                <div>
+                  <div class="miniCard__title">Statique</div>
+                  <div class="miniCard__text">Tu héberges où tu veux, zéro backend.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <footer class="footer">
-        <div class="footer__line"></div>
-        <p class="muted tiny">
-          Fait avec ❤️, du beurre, et un peu trop d’obsession pour les détails.
-        </p>
-      </footer>
+    <!-- CTA -->
+    <section class="cta" id="cta">
+      <div class="container">
+        <div class="cta__card">
+          <div class="cta__left">
+            <div class="cta__eyebrow">Let’s go</div>
+            <h2 class="cta__title">Prête à tourner les pages ?</h2>
+            <p class="cta__text">
+              Feuillette la version digitale maintenant.
+              Et quand la version imprimée arrive… c’est la vraie expérience “livre” en bonus.
+            </p>
+            <div class="cta__actions">
+              <a class="btn btn--primary" id="readerLinkCta" href="reader.html"><i class="fa-solid fa-book-open"></i><span>Ouvrir le lecteur</span></a>
+              <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span>Télécharger</span></a>
+              <button class="btn btn--soft" id="btnQr3" type="button"><i class="fa-solid fa-qrcode"></i><span>QR</span></button>
+            </div>
+          </div>
+
+          <div class="cta__right">
+            <div class="printCard">
+              <div class="printCard__top">
+                <div class="printCard__badge"><i class="fa-solid fa-gift"></i> édition imprimée</div>
+                <div class="printCard__title">Bientôt livrée</div>
+              </div>
+              <div class="printCard__text">
+                Le papier met un peu plus de temps, mais il arrive.
+                En attendant : la version digitale est déjà prête et super agréable à lire.
+              </div>
+              <div class="printCard__bar">
+                <div class="printCard__barFill" style="width: 72%"></div>
+              </div>
+              <div class="printCard__meta muted tiny">Progression (très scientifique) : 72%</div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="footer__line"></div>
+          <div class="footer__inner">
+            <div class="footer__left muted tiny">Fait avec ❤️, du beurre, et un peu trop d’obsession pour les détails.</div>
+            <a class="footer__top" href="#top" aria-label="Retour en haut"><i class="fa-solid fa-arrow-up"></i></a>
+          </div>
+        </footer>
+      </div>
     </section>
   </main>
 
-  <noscript>
-    <div class="noscript">
-      <strong>JavaScript est désactivé.</strong> Le flipbook a besoin de JS pour fonctionner.
-      Tu peux quand même télécharger le PDF : <a href="book.pdf">book.pdf</a>
-    </div>
-  </noscript>
-
   <canvas id="fx" class="fx" aria-hidden="true"></canvas>
-  <script defer src="app.js"></script>
+
+  <script defer src="main.js"></script>
 </body>
 </html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Lecture — Mes recettes personnelles</title>
+  <meta name="description" content="Lecteur flipbook pour le PDF du livre de recettes." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <link rel="stylesheet" href="reader.css" />
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+</head>
+
+<body>
+  <div class="rbg">
+    <div class="rbg__orbs a"></div>
+    <div class="rbg__orbs b"></div>
+    <div class="rbg__noise"></div>
+  </div>
+
+  <header class="rnav">
+    <a class="rnav__back" href="index.html" aria-label="Retour">
+      <i class="fa-solid fa-arrow-left"></i><span>Retour</span>
+    </a>
+
+    <div class="rnav__title">
+      <div class="rnav__name">Mes recettes personnelles</div>
+      <div class="rnav__sub muted">Lecteur</div>
+    </div>
+
+    <div class="rnav__actions">
+      <a class="btn btn--ghost" href="book.pdf" target="_blank" rel="noopener">
+        <i class="fa-solid fa-up-right-from-square"></i><span>Ouvrir</span>
+      </a>
+      <a class="btn btn--primary" href="book.pdf" download>
+        <i class="fa-solid fa-download"></i><span>PDF</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="reader">
+    <aside class="side">
+      <div class="side__block">
+        <div class="side__label">Navigation</div>
+        <div class="side__row">
+          <button class="tool" id="prevBtn" type="button" title="Page précédente (←)">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <button class="tool" id="nextBtn" type="button" title="Page suivante (→)">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="side__row side__row--wide">
+          <div class="pill" id="pageLabel">Page —</div>
+        </div>
+
+        <div class="side__row side__row--wide">
+          <input class="slider" id="pageSlider" type="range" min="0" max="1" value="0" step="1" aria-label="Aller à la page" />
+        </div>
+
+        <div class="side__row side__row--wide">
+          <button class="tool tool--wide" id="toggleLayout" type="button" title="Basculer 1 page / double page">
+            <i class="fa-solid fa-book"></i><span id="layoutLabel">Double page</span>
+          </button>
+        </div>
+
+        <div class="side__row">
+          <button class="tool" id="zoomOut" type="button" title="Zoom -">−</button>
+          <button class="tool" id="zoomIn" type="button" title="Zoom +">+</button>
+          <button class="tool" id="fullscreen" type="button" title="Plein écran">
+            <i class="fa-solid fa-expand"></i>
+          </button>
+        </div>
+
+        <div class="side__hint muted tiny">
+          Astuces : ← → • clique sur un coin • double-clic pour zoom • si le mode 1 page ne te convient pas, repasse en double page.
+        </div>
+      </div>
+
+      <div class="side__block">
+        <div class="side__label">Info</div>
+        <div class="info">
+          <div><span class="muted">Pages</span> <strong id="pageCount">—</strong></div>
+          <div><span class="muted">Mode</span> <strong id="modeLabel">—</strong></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage" id="stage">
+      <div class="loading" id="loading">
+        <div class="loading__spinner"></div>
+        <div class="loading__text">
+          <div class="loading__title">Préparation du livre…</div>
+          <div class="loading__sub" id="loadingSub">Chargement du PDF</div>
+          <div class="loading__bar"><div class="loading__barFill" id="loadingBar"></div></div>
+        </div>
+      </div>
+
+      <div class="bookWrap" id="bookWrap">
+        <div id="book" class="book" aria-label="Livre"></div>
+      </div>
+    </section>
+  </main>
+
+  <script defer src="reader.js"></script>
+</body>
+</html>
