@@ -159,7 +159,7 @@ code{
   font-size: .95rem;
   line-height:1.05;
 }
-.nav__links{display:none; align-items:center; gap: 18px}
+.nav__links{display:none; align-items:center; gap: 18px; white-space: nowrap;}
 .nav__links a{
   color: rgba(255,255,255,.78);
   font-size: .95rem;
@@ -691,4 +691,130 @@ code{
 @media (max-width: 420px){
   .stat{min-width: 0; flex: 1}
   .swiper-slide img{height: 420px}
+}
+
+
+/* -----------------------------------------
+   Extra "wow" polish (still sober & pro)
+------------------------------------------*/
+
+/* Smooth first paint after translations */
+body{transition: opacity .30s ease}
+body.is-loading{opacity:0}
+
+/* Subtle scroll progress (top nav) */
+.navwrap{position:sticky}
+.navprogress{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:2px;
+  transform-origin:left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, rgba(255,122,73,.95), rgba(202,161,92,.85), rgba(111,125,75,.80));
+  opacity:.75;
+}
+
+/* Language switcher */
+.lang{position:relative}
+.lang__btn{
+  display:inline-flex; align-items:center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.88);
+}
+.lang__btn:hover{background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18)}
+.lang__menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 180px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(7,10,18,.72);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 70px rgba(0,0,0,.45);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 80;
+}
+.lang__menu.is-open{
+  opacity:1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.lang__item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255,255,255,.88);
+  cursor:pointer;
+  font-size: .95rem;
+}
+.lang__item:hover{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.10);
+  color:#fff;
+}
+.lang__item.is-active::after{
+  content:"✓";
+  color: rgba(255,255,255,.92);
+}
+
+/* Buttons: shimmer highlight */
+.btn{position:relative; overflow:hidden}
+.btn::after{
+  content:"";
+  position:absolute;
+  top:-40%; left:-30%;
+  width: 60%; height: 180%;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.16), rgba(255,255,255,0));
+  transform: rotate(18deg) translateX(-120%);
+  opacity:0;
+  pointer-events:none;
+}
+.btn:hover::after{
+  opacity:1;
+  transform: rotate(18deg) translateX(220%);
+  transition: transform .65s ease, opacity .20s ease;
+}
+
+/* Cards: tiny lift + glow */
+.panel, .gallery__card, .miniCard, .printCard{
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.panel:hover, .gallery__card:hover, .miniCard:hover, .printCard:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.14);
+}
+
+/* Hero: soft spotlight follows the cursor */
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:-20px;
+  pointer-events:none;
+  background: radial-gradient(680px 380px at var(--mx,50%) var(--my,50%), rgba(255,255,255,.09) 0%, rgba(255,255,255,0) 62%);
+  opacity:0;
+  transition: opacity .25s ease;
+}
+.hero:hover::before{opacity:1}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .bg__orbs{animation:none !important}
+  .btn::after{display:none}
+  .panel, .gallery__card, .miniCard, .printCard{transition:none}
+  .hero::before{display:none}
 }

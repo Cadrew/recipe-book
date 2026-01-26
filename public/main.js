@@ -1,41 +1,82 @@
 /* Landing interactions (index.html) */
-
 (function () {
-  const qs = new URLSearchParams(location.search);
-  const to = qs.get("to")?.trim();
+  const i18n = window.i18n;
 
-  // Personalization
-  if (to) {
-    const heroTo = document.getElementById("heroTo");
-    if (heroTo) heroTo.textContent = `Bon anniversaire ${to}`;
-    const giftText = document.getElementById("giftText");
-    if (giftText) {
-      giftText.textContent =
-        `J’espère que ce livre te donnera envie de cuisiner des trucs bons, simples, et un peu dangereux. ` +
-        `Et surtout : qu’on en fasse ensemble. Bon anniversaire ${to} 💛`;
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Helpers
+  const getQS = () => new URLSearchParams(location.search);
+
+  function setHashPreservingQuery(hash) {
+    const u = new URL(location.href);
+    u.hash = hash;
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
+
+  function updateProgressLabel() {
+    const el = document.getElementById("progressLabel");
+    if (!el || !i18n) return;
+    const pct = 72;
+    el.textContent = i18n.t("index.print.progress", { pct });
+  }
+
+  function updatePageCount() {
+    const qs = getQS();
+    const DEFAULT_PAGES = 66;
+    const pagesFromQS = Number(qs.get("pages"));
+    const pages = Number.isFinite(pagesFromQS) && pagesFromQS > 0 ? pagesFromQS : DEFAULT_PAGES;
+    const pageCount = document.getElementById("pageCount");
+    if (pageCount) pageCount.textContent = String(pages);
+  }
+
+  function updateReaderLinks() {
+    const qs = getQS();
+    const readerLinks = ["readerLinkTop", "readerLinkHero", "readerLinkGallery", "readerLinkCta", "readerLinkMobile"];
+    for (const id of readerLinks) {
+      const a = document.getElementById(id);
+      if (!a) continue;
+      const url = new URL(a.getAttribute("href") || "reader.html", location.href);
+      // Keep all query params (to, pages, lang, etc)
+      for (const [k, v] of qs.entries()) url.searchParams.set(k, v);
+      a.setAttribute("href", url.pathname + url.search);
     }
   }
 
-  // Keep query params when going to reader
-  const readerLinks = [
-    "readerLinkTop",
-    "readerLinkHero",
-    "readerLinkGallery",
-    "readerLinkCta",
-    "readerLinkMobile",
-  ];
-  for (const id of readerLinks) {
-    const a = document.getElementById(id);
-    if (!a) continue;
-    const url = new URL(a.getAttribute("href") || "reader.html", location.href);
-    for (const [k, v] of qs.entries()) url.searchParams.set(k, v);
-    a.setAttribute("href", url.pathname + url.search);
+  function applyPersonalization() {
+    const qs = getQS();
+    const to = qs.get("to")?.trim();
+
+    const heroTo = document.getElementById("heroTo");
+    if (heroTo && i18n) heroTo.textContent = i18n.t("dyn.heroTo", { name: to || "" });
+
+    const giftText = document.getElementById("giftText");
+    if (giftText && i18n) giftText.textContent = i18n.t("dyn.giftText", { name: to || "" });
   }
 
-  // Page count display (update this if you swap the PDF)
-  const DEFAULT_PAGES = 66;
-  const pageCount = document.getElementById("pageCount");
-  if (pageCount) pageCount.textContent = String(DEFAULT_PAGES);
+  // Apply translations ASAP (defer scripts run after DOM is parsed)
+  try {
+    i18n?.apply();
+  } catch {
+    // ignore
+  }
+
+  updatePageCount();
+  updateReaderLinks();
+  updateProgressLabel();
+  applyPersonalization();
+
+  // Re-apply dynamic strings on language change
+  window.addEventListener("langchange", () => {
+    // i18n already updated the DOM strings; we update dynamic ones + derived
+    updateReaderLinks();
+    updateProgressLabel();
+    applyPersonalization();
+  });
+
+  // Remove loading veil
+  requestAnimationFrame(() => {
+    document.body.classList.remove("is-loading");
+  });
 
   // Mobile menu
   const burger = document.getElementById("burger");
@@ -50,7 +91,7 @@
   closeMobile?.addEventListener("click", () => openMobile(false));
   navmobile?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => openMobile(false)));
 
-  // Smooth anchor scroll
+  // Smooth anchor scroll (preserve query params)
   document.querySelectorAll('a[href^="#"]').forEach((a) => {
     a.addEventListener("click", (e) => {
       const href = a.getAttribute("href");
@@ -59,14 +100,88 @@
       if (!el) return;
       e.preventDefault();
       el.scrollIntoView({ behavior: "smooth", block: "start" });
-      history.replaceState(null, "", href);
+      setHashPreservingQuery(href);
     });
   });
+
+  // Scroll progress bar
+  const navprogress = document.getElementById("navprogress");
+  function updateProgress() {
+    if (!navprogress) return;
+    const doc = document.documentElement;
+    const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+    const p = Math.max(0, Math.min(1, window.scrollY / max));
+    navprogress.style.transform = `scaleX(${p})`;
+  }
+  window.addEventListener("scroll", updateProgress, { passive: true });
+  window.addEventListener("resize", updateProgress);
+  updateProgress();
+
+  // Hero spotlight follow
+  const hero = document.querySelector(".hero");
+  if (hero && !prefersReducedMotion) {
+    hero.addEventListener("mousemove", (e) => {
+      const r = hero.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      hero.style.setProperty("--mx", `${x}%`);
+      hero.style.setProperty("--my", `${y}%`);
+    });
+  }
 
   // QR modal
   const modal = document.getElementById("qrModal");
   const qrBox = document.getElementById("qrBox");
-  let qrRendered = false;
+  let qrRenderedKey = "";
+
+  function renderQr(targetUrl) {
+    if (!qrBox) return;
+
+    const opts = { width: 260, margin: 2, color: { dark: "#111318", light: "#f5f1e8" } };
+    qrBox.innerHTML = "";
+
+    if (!window.QRCode || typeof window.QRCode.toCanvas !== "function") {
+      qrBox.textContent = i18n?.t("qr.error") || "Couldn't generate the QR code.";
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    const done = (err) => {
+      if (!err) {
+        canvas.style.borderRadius = "16px";
+        canvas.style.boxShadow = "0 18px 55px rgba(0,0,0,.35)";
+        qrBox.appendChild(canvas);
+        qrRenderedKey = targetUrl;
+      } else {
+        qrBox.textContent = i18n?.t("qr.error") || "Couldn't generate the QR code.";
+      }
+    };
+
+    try {
+      // Most browser builds: toCanvas(canvas, text, options, cb)
+      if (window.QRCode.toCanvas.length >= 4) {
+        window.QRCode.toCanvas(canvas, targetUrl, opts, done);
+      } else {
+        // Some builds: toCanvas(text, options, cb)
+        window.QRCode.toCanvas(targetUrl, opts, (err, maybeCanvas) => {
+          if (!err && maybeCanvas instanceof HTMLCanvasElement) {
+            maybeCanvas.style.borderRadius = "16px";
+            maybeCanvas.style.boxShadow = "0 18px 55px rgba(0,0,0,.35)";
+            qrBox.appendChild(maybeCanvas);
+            qrRenderedKey = targetUrl;
+          } else {
+            // Fallback to our canvas (if library wrote into it)
+            if (!err && canvas.width) {
+              qrBox.appendChild(canvas);
+              qrRenderedKey = targetUrl;
+            } else done(err);
+          }
+        });
+      }
+    } catch (e) {
+      done(e);
+    }
+  }
 
   function openQr() {
     if (!modal) return;
@@ -74,24 +189,8 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
 
-    if (!qrRendered && qrBox && window.QRCode) {
-      const url = location.href;
-      qrBox.innerHTML = "";
-      QRCode.toCanvas(
-        url,
-        { width: 260, margin: 2, color: { dark: "#111318", light: "#f5f1e8" } },
-        (err, canvas) => {
-          if (!err && canvas) {
-            canvas.style.borderRadius = "16px";
-            canvas.style.boxShadow = "0 18px 55px rgba(0,0,0,.35)";
-            qrBox.appendChild(canvas);
-            qrRendered = true;
-          } else {
-            qrBox.textContent = "Impossible de générer le QR code.";
-          }
-        }
-      );
-    }
+    const url = location.href;
+    if (qrBox && url !== qrRenderedKey) renderQr(url);
   }
 
   function closeQr() {
@@ -117,9 +216,9 @@
   document.getElementById("btnCopyLink")?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
-      toast("Lien copié ✨");
+      toast(i18n?.t("toast.linkCopied") || "Link copied ✨");
     } catch {
-      toast("Copie impossible (navigateur).");
+      toast(i18n?.t("toast.copyFailed") || "Copy failed (browser).");
     }
   });
 
@@ -140,7 +239,7 @@
 
   // Simple 3D tilt on mockup
   const tilt = document.getElementById("tilt");
-  if (tilt) {
+  if (tilt && !prefersReducedMotion) {
     const strength = 10;
     tilt.addEventListener("mousemove", (e) => {
       const r = tilt.getBoundingClientRect();
@@ -154,8 +253,16 @@
   }
 
   // GSAP reveal animations
-  if (window.gsap && window.ScrollTrigger) {
+  if (window.gsap && window.ScrollTrigger && !prefersReducedMotion) {
     gsap.registerPlugin(ScrollTrigger);
+
+    // Hero entrance
+    gsap.fromTo(
+      ".kicker, .hero__title, .hero__lead, .hero__actions, .stats, .mock",
+      { y: 14, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", stagger: 0.06 }
+    );
+
     gsap.utils.toArray(".panel, .timeline__item, .gallery__card, .miniCard, .cta__card").forEach((el) => {
       gsap.fromTo(
         el,
@@ -241,8 +348,17 @@
 
   document.getElementById("btnConfetti")?.addEventListener("click", () => {
     burst();
-    toast("✨ Bon anniversaire !");
+    toast(i18n?.t("toast.bday") || "✨ Happy birthday!");
   });
+
+  // Optional: tiny initial burst when personalized
+  if (!prefersReducedMotion) {
+    const qs = getQS();
+    if (qs.get("party") === "1" || (qs.get("to") && !sessionStorage.getItem("partyBurstDone"))) {
+      sessionStorage.setItem("partyBurstDone", "1");
+      setTimeout(() => burst(), 650);
+    }
+  }
 
   // tiny toast
   let toastEl;

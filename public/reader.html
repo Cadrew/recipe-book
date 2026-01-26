@@ -1,115 +1,112 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en" data-i18n-doc-title="meta.reader.title">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark light" />
-  <title>Lecture — Mes recettes personnelles</title>
-  <meta name="description" content="Lecteur flipbook pour le PDF du livre de recettes." />
+  <title>Reader — My personal recipes</title>
+  <meta name="description" content="Flipbook reader for the recipe book PDF." data-i18n-meta="meta.reader.description" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
   <link rel="stylesheet" href="reader.css" />
 
+  <!-- Flipbook -->
+  <script defer src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 </head>
 
-<body>
-  <div class="rbg">
-    <div class="rbg__orbs a"></div>
-    <div class="rbg__orbs b"></div>
-    <div class="rbg__noise"></div>
-  </div>
-
+<body class="is-loading">
   <header class="rnav">
-    <a class="rnav__back" href="index.html" aria-label="Retour">
-      <i class="fa-solid fa-arrow-left"></i><span>Retour</span>
+    <a class="rnav__back" href="index.html" id="backLink">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span data-i18n="reader.back">Back</span>
     </a>
 
-    <div class="rnav__title">
-      <div class="rnav__name">Mes recettes personnelles</div>
-      <div class="rnav__sub muted">Lecteur</div>
+    <div class="rnav__brand">
+      <div class="rnav__title" data-i18n="index.brandTitle">My personal recipes</div>
+      <div class="rnav__sub muted" data-i18n="reader.subtitle">Reader</div>
     </div>
 
     <div class="rnav__actions">
-      <a class="btn btn--ghost" href="book.pdf" target="_blank" rel="noopener">
-        <i class="fa-solid fa-up-right-from-square"></i><span>Ouvrir</span>
-      </a>
-      <a class="btn btn--primary" href="book.pdf" download>
-        <i class="fa-solid fa-download"></i><span>PDF</span>
-      </a>
+      <div class="lang">
+        <button class="lang__btn" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false" data-i18n-aria="common.language">
+          <i class="fa-solid fa-globe"></i><span data-lang-label>EN</span><i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="lang__menu" id="langMenu" role="menu">
+          <button class="lang__item" type="button" data-lang="en" role="menuitemradio" aria-checked="true">English</button>
+          <button class="lang__item" type="button" data-lang="fr" role="menuitemradio" aria-checked="false">Français</button>
+          <button class="lang__item" type="button" data-lang="da" role="menuitemradio" aria-checked="false">Dansk</button>
+        </div>
+      </div>
+
+      <a class="btn btn--ghost" href="index.html#gallery" id="openFromIndex"><i class="fa-regular fa-images"></i> <span data-i18n="common.open">Open</span></a>
+      <a class="btn btn--primary" href="book.pdf" download><i class="fa-solid fa-download"></i> <span data-i18n="common.pdf">PDF</span></a>
     </div>
   </header>
 
   <main class="reader">
     <aside class="side">
       <div class="side__block">
-        <div class="side__label">Navigation</div>
-        <div class="side__row">
-          <button class="tool" id="prevBtn" type="button" title="Page précédente (←)">
-            <i class="fa-solid fa-arrow-left"></i>
+        <div class="side__title"><i class="fa-solid fa-compass"></i> <span data-i18n="reader.nav">Navigation</span></div>
+
+        <div class="pager">
+          <button class="tool" id="prevBtn" type="button" data-i18n-title="reader.prevTitle" title="Previous page (←)"><i class="fa-solid fa-chevron-left"></i></button>
+
+          <div class="pager__mid">
+            <div class="pager__label muted tiny" data-i18n="reader.goto">Go to page</div>
+            <input id="pageInput" type="number" min="1" value="1" />
+            <div class="pager__meta muted tiny" id="pageLabel">—</div>
+          </div>
+
+          <button class="tool" id="nextBtn" type="button" data-i18n-title="reader.nextTitle" title="Next page (→)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <div class="toolsRow">
+          <button class="tool tool--wide" id="toggleLayout" type="button" data-i18n-title="reader.toggleTitle" title="Switch single / two-page">
+            <i class="fa-solid fa-book-open"></i>
+            <span id="layoutLabel" data-i18n="reader.toggleLabel.single">Single page</span>
           </button>
-          <button class="tool" id="nextBtn" type="button" title="Page suivante (→)">
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
+          <button class="tool" id="zoomOut" type="button" data-i18n-title="reader.zoomOutTitle" title="Zoom out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+          <button class="tool" id="zoomIn" type="button" data-i18n-title="reader.zoomInTitle" title="Zoom in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+          <button class="tool" id="fullscreen" type="button" data-i18n-title="reader.fullscreenTitle" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
         </div>
 
-        <div class="side__row side__row--wide">
-          <div class="pill" id="pageLabel">Page —</div>
-        </div>
-
-        <div class="side__row side__row--wide">
-          <input class="slider" id="pageSlider" type="range" min="0" max="1" value="0" step="1" aria-label="Aller à la page" />
-        </div>
-
-        <div class="side__row side__row--wide">
-          <button class="tool tool--wide" id="toggleLayout" type="button" title="Basculer 1 page / double page">
-            <i class="fa-solid fa-book"></i><span id="layoutLabel">Double page</span>
-          </button>
-        </div>
-
-        <div class="side__row">
-          <button class="tool" id="zoomOut" type="button" title="Zoom -">−</button>
-          <button class="tool" id="zoomIn" type="button" title="Zoom +">+</button>
-          <button class="tool" id="fullscreen" type="button" title="Plein écran">
-            <i class="fa-solid fa-expand"></i>
-          </button>
-        </div>
-
-        <div class="side__hint muted tiny">
-          Astuces : ← → • clique sur un coin • double-clic pour zoom • si le mode 1 page ne te convient pas, repasse en double page.
-        </div>
+        <p class="hint muted tiny" id="hintText" data-i18n="reader.hint">
+          Tips: ← → • click a corner • double-click to zoom • if single-page doesn’t feel right, switch back to two-page.
+        </p>
       </div>
 
       <div class="side__block">
-        <div class="side__label">Info</div>
-        <div class="info">
-          <div><span class="muted">Pages</span> <strong id="pageCount">—</strong></div>
-          <div><span class="muted">Mode</span> <strong id="modeLabel">—</strong></div>
+        <div class="side__title"><i class="fa-solid fa-circle-info"></i> <span data-i18n="reader.info">Info</span></div>
+        <div class="metaList">
+          <div class="metaRow">
+            <span class="muted" data-i18n="reader.info.pages">Pages</span>
+            <span id="totalPages">—</span>
+          </div>
+          <div class="metaRow">
+            <span class="muted" data-i18n="reader.info.mode">Mode</span>
+            <span id="modeLabel" data-i18n="reader.mode.two">Two-page</span>
+          </div>
         </div>
       </div>
     </aside>
 
     <section class="stage" id="stage">
-      <div class="loading" id="loading">
-        <div class="loading__spinner"></div>
-        <div class="loading__text">
-          <div class="loading__title">Préparation du livre…</div>
-          <div class="loading__sub" id="loadingSub">Chargement du PDF</div>
-          <div class="loading__bar"><div class="loading__barFill" id="loadingBar"></div></div>
-        </div>
-      </div>
-
       <div class="bookWrap" id="bookWrap">
-        <div id="book" class="book" aria-label="Livre"></div>
+        <div class="book" id="book"></div>
+      </div>
+      <div class="loading" id="loading" aria-hidden="true">
+        <div class="spinner"></div>
+        <div class="loading__title" data-i18n="reader.loading.title">Preparing the book…</div>
+        <div class="loading__sub muted tiny" id="loadingSub" data-i18n="reader.loading.sub">Loading PDF</div>
+        <div class="loading__bar" aria-hidden="true"><div class="loading__barFill" id="loadingBarFill"></div></div>
       </div>
     </section>
   </main>
 
+  <script defer src="i18n.js"></script>
   <script defer src="reader.js"></script>
 </body>
 </html>

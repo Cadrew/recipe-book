@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en" data-i18n-doc-title="meta.index.title">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
-  <title>Mes recettes personnelles — Bon anniversaire</title>
-  <meta name="description" content="Une page cadeau (style landing/portfolio) + un lecteur pour feuilleter le livre de recettes." />
+  <title>My personal recipes — Happy birthday</title>
+  <meta name="description" content="A little gift page (landing/portfolio style) + a flipbook reader for the recipe book PDF." data-i18n-meta="meta.index.description" />
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,8 +26,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-  <meta property="og:title" content="Mes recettes personnelles — Bon anniversaire" />
-  <meta property="og:description" content="Un petit cadeau : un livre de recettes à feuilleter en ligne." />
+  <meta property="og:title" content="My personal recipes — Happy birthday" />
+  <meta property="og:description" content="A little gift: a recipe book you can flip through online." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="assets/cover.jpg" />
 </head>
@@ -44,61 +44,74 @@
 
   <!-- Top nav -->
   <header class="navwrap" id="top">
+    <div class="navprogress" id="navprogress" aria-hidden="true"></div>
+
     <div class="nav">
-      <a class="nav__brand" href="#top" aria-label="Retour en haut">
+      <a class="nav__brand" href="#top" data-i18n-aria="index.footer.toTop">
         <span class="nav__mark"><i class="fa-solid fa-utensils"></i></span>
         <span class="nav__brandText">
-          <span class="nav__brandTitle">Mes recettes personnelles</span>
-          <span class="nav__brandSub">A family recipe book</span>
+          <span class="nav__brandTitle" data-i18n="index.brandTitle">My personal recipes</span>
+          <span class="nav__brandSub" data-i18n="index.brandSub">A family recipe book</span>
         </span>
       </a>
 
-      <nav class="nav__links" aria-label="Navigation">
-        <a href="#about">Le cadeau</a>
-        <a href="#chapters">À l’intérieur</a>
-        <a href="#gallery">Aperçu</a>
-        <a href="#cta">Lire</a>
-        <button class="nav__qr" id="btnQr" type="button" title="QR code de cette page">
-          <i class="fa-solid fa-qrcode"></i><span>QR</span>
-        </button>
+      <nav class="nav__links" data-i18n-aria="reader.nav" aria-label="Navigation">
+        <a href="#about" data-i18n="index.nav.gift">The gift</a>
+        <a href="#chapters" data-i18n="index.nav.inside">Inside</a>
+        <a href="#gallery" data-i18n="index.nav.preview">Preview</a>
+        <a href="#cta" data-i18n="index.nav.read">Read</a>
+        <!-- <button class="nav__qr" id="btnQr" type="button" data-i18n-title="index.nav.qrTitle" title="QR code for this page">
+          <i class="fa-solid fa-qrcode"></i><span data-i18n="common.qr">QR</span>
+        </button> -->
       </nav>
 
       <div class="nav__cta">
-        <a class="btn btn--ghost" id="readerLinkTop" href="reader.html">Feuilleter</a>
+        <div class="lang">
+          <button class="lang__btn" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false" data-i18n-aria="common.language">
+            <i class="fa-solid fa-globe"></i><span data-lang-label>EN</span><i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="lang__menu" id="langMenu" role="menu">
+            <button class="lang__item" type="button" data-lang="en" role="menuitemradio" aria-checked="true">English</button>
+            <button class="lang__item" type="button" data-lang="fr" role="menuitemradio" aria-checked="false">Français</button>
+            <button class="lang__item" type="button" data-lang="da" role="menuitemradio" aria-checked="false">Dansk</button>
+          </div>
+        </div>
+
+        <a class="btn btn--ghost" id="readerLinkTop" href="reader.html" data-i18n="index.nav.flip">Flip through</a>
         <a class="btn btn--primary" href="book.pdf" download>
-          <i class="fa-solid fa-download"></i><span>PDF</span>
+          <i class="fa-solid fa-download"></i><span data-i18n="common.pdf">PDF</span>
         </a>
       </div>
 
-      <button class="nav__burger" id="burger" aria-label="Ouvrir le menu" type="button">
+      <button class="nav__burger" id="burger" type="button" data-i18n-aria="index.nav.burger" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
     </div>
 
     <div class="navmobile" id="navmobile" aria-hidden="true">
-      <a href="#about" class="navmobile__link">Le cadeau</a>
-      <a href="#chapters" class="navmobile__link">À l’intérieur</a>
-      <a href="#gallery" class="navmobile__link">Aperçu</a>
-      <a href="#cta" class="navmobile__link">Lire</a>
-      <a href="reader.html" id="readerLinkMobile" class="btn btn--ghost navmobile__cta">Feuilleter</a>
-      <a class="btn btn--primary navmobile__cta" href="book.pdf" download><i class="fa-solid fa-download"></i><span>Télécharger</span></a>
-      <button class="btn btn--soft navmobile__cta" id="closeMobile" type="button">Fermer</button>
+      <a href="#about" class="navmobile__link" data-i18n="index.nav.gift">The gift</a>
+      <a href="#chapters" class="navmobile__link" data-i18n="index.nav.inside">Inside</a>
+      <a href="#gallery" class="navmobile__link" data-i18n="index.nav.preview">Preview</a>
+      <a href="#cta" class="navmobile__link" data-i18n="index.nav.read">Read</a>
+      <a href="reader.html" id="readerLinkMobile" class="btn btn--ghost navmobile__cta" data-i18n="index.nav.flip">Flip through</a>
+      <a class="btn btn--primary navmobile__cta" href="book.pdf" download><i class="fa-solid fa-download"></i><span data-i18n="common.download">Download</span></a>
+      <button class="btn btn--soft navmobile__cta" id="closeMobile" type="button" data-i18n="common.close">Close</button>
     </div>
   </header>
 
   <!-- QR Modal -->
-  <div class="modal" id="qrModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="QR code">
+  <div class="modal" id="qrModal" aria-hidden="true" role="dialog" aria-modal="true" data-i18n-aria="qr.title" aria-label="QR code">
     <div class="modal__backdrop" data-close></div>
     <div class="modal__panel">
       <div class="modal__head">
         <div>
-          <h3>QR code</h3>
-          <p class="muted">Pratique pour une carte cadeau.</p>
+          <h3 data-i18n="qr.title">QR code</h3>
+          <p class="muted" data-i18n="qr.subtitle">Handy for a gift card.</p>
         </div>
-        <button class="iconbtn" data-close aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+        <button class="iconbtn" data-close data-i18n-aria="common.close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal__qr" id="qrBox" aria-label="QR code"></div>
-      <p class="muted tiny">Astuce : ajoute <code>?to=Prénom</code> dans l’URL pour personnaliser le message.</p>
+      <div class="modal__qr" id="qrBox" data-i18n-aria="qr.title" aria-label="QR code"></div>
+      <p class="muted tiny" data-i18n-html="qr.tip">Tip: add <code>?to=FirstName</code> in the URL to personalize the message.</p>
     </div>
   </div>
 
@@ -109,44 +122,42 @@
         <div class="hero__left">
           <div class="kicker">
             <span class="kicker__dot"></span>
-            <span id="heroKicker">Un cadeau maison, en avance</span>
+            <span id="heroKicker" data-i18n="index.hero.kicker">A homemade gift — a bit early</span>
           </div>
 
           <h1 class="hero__title">
-            <span class="hero__script" id="heroTo">Bon anniversaire</span>
-            <span class="hero__titleLine">✨</span>
+            <span class="hero__script" id="heroTo" data-i18n="index.hero.toDefault">Happy birthday</span>
           </h1>
 
           <p class="hero__lead">
-            J’ai écrit un petit livre avec <strong>mes recettes préférées</strong> — celles que je refais tout le temps,
-            du comfort food aux desserts “wow”.
-            <span class="hero__note">La version imprimée arrive un peu plus tard (l’imprimeur m’a trahi 😅), mais tu peux déjà le feuilleter ici.</span>
+            <span data-i18n-html="index.hero.lead">I put together a little book with <strong>my favorite recipes</strong> — the ones I cook all the time, from comfort food to “wow” desserts.</span>
+            <span class="hero__note" data-i18n="index.hero.note">The printed version is coming a bit later (the printer betrayed me 😅), but you can already flip through it here.</span>
           </p>
 
           <div class="hero__actions">
             <a class="btn btn--primary" id="readerLinkHero" href="reader.html">
-              <i class="fa-solid fa-book-open"></i><span>Ouvrir le livre</span>
+              <i class="fa-solid fa-book-open"></i><span data-i18n="index.hero.openBook">Open the book</span>
             </a>
             <a class="btn btn--ghost" href="#gallery">
-              <i class="fa-regular fa-images"></i><span>Aperçu</span>
+              <i class="fa-regular fa-images"></i><span data-i18n="index.hero.previewBtn">Preview</span>
             </a>
             <button class="btn btn--soft" id="btnConfetti" type="button">
-              <i class="fa-solid fa-wand-magic-sparkles"></i><span>Un peu de magie</span>
+              <i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="index.hero.magic">A little magic</span>
             </button>
           </div>
 
           <div class="stats">
             <div class="stat">
               <div class="stat__num" id="pageCount">—</div>
-              <div class="stat__label">pages</div>
+              <div class="stat__label" data-i18n="index.stats.pages">pages</div>
             </div>
             <div class="stat">
               <div class="stat__num">A4</div>
-              <div class="stat__label">format</div>
+              <div class="stat__label" data-i18n="index.stats.format">format</div>
             </div>
             <div class="stat">
               <div class="stat__num">100%</div>
-              <div class="stat__label">fait maison</div>
+              <div class="stat__label" data-i18n="index.stats.homemade">homemade</div>
             </div>
           </div>
         </div>
@@ -155,17 +166,17 @@
           <div class="mock">
             <div class="mock__glow"></div>
             <div class="mock__card" id="tilt">
-              <img class="mock__img" src="assets/cover.jpg" alt="Couverture du livre" />
+              <img class="mock__img" src="assets/cover.jpg" alt="Book cover" />
               <div class="mock__shine"></div>
               <div class="mock__badge">
-                <i class="fa-solid fa-seal-check"></i> édition digitale
+                <i class="fa-solid fa-seal-check"></i> <span data-i18n="index.mock.badge">digital edition</span>
               </div>
             </div>
           </div>
 
           <div class="scrollHint">
             <span class="scrollHint__mouse"></span>
-            <span class="scrollHint__text">Scroll</span>
+            <span class="scrollHint__text" data-i18n="index.scroll">Scroll</span>
           </div>
         </div>
       </div>
@@ -181,23 +192,22 @@
     <section class="section" id="about">
       <div class="container grid2">
         <div class="panel">
-          <div class="section__eyebrow">Le cadeau</div>
-          <h2 class="section__title">Un livre de recettes, comme un petit héritage</h2>
-          <p class="section__text">
-            L’idée, c’est simple : un recueil de recettes que j’aime vraiment, avec des explications claires,
-            des astuces, et cette vibe “on cuisine et on rigole”.
+          <div class="section__eyebrow" data-i18n="index.about.eyebrow">The gift</div>
+          <h2 class="section__title" data-i18n="index.about.title">A recipe book — like a tiny heirloom</h2>
+          <p class="section__text" data-i18n="index.about.text">
+            The idea is simple: a collection of recipes I truly love, with clear steps, tips, and that “we cook and laugh” vibe.
           </p>
           <ul class="bullets">
-            <li><i class="fa-solid fa-check"></i><span>Lecture en mode <strong>livre</strong> (page turn, double/single page)</span></li>
-            <li><i class="fa-solid fa-check"></i><span>Téléchargement du PDF pour imprimer ou garder</span></li>
-            <li><i class="fa-solid fa-check"></i><span>Version imprimée en route : <strong>arrive après</strong> 🎁</span></li>
+            <li><i class="fa-solid fa-check"></i><span data-i18n-html="index.about.b1">Read in <strong>book</strong> mode (page turn, single/double page)</span></li>
+            <li><i class="fa-solid fa-check"></i><span data-i18n="index.about.b2">Download the PDF to print or keep</span></li>
+            <li><i class="fa-solid fa-check"></i><span data-i18n-html="index.about.b3">Printed version on the way: <strong>coming soon</strong> 🎁</span></li>
           </ul>
 
           <div class="noteCard">
             <div class="noteCard__icon"><i class="fa-solid fa-truck-fast"></i></div>
             <div>
-              <div class="noteCard__title">Teasing “imprimeur”</div>
-              <div class="noteCard__text">Le PDF est déjà là. Le papier arrive bientôt (promis). 😄</div>
+              <div class="noteCard__title" data-i18n="index.about.noteTitle">A little “printer” teaser</div>
+              <div class="noteCard__text" data-i18n="index.about.noteText">The PDF is already here. Paper is coming soon (promise). 😄</div>
             </div>
           </div>
         </div>
@@ -206,18 +216,17 @@
           <div class="quote">
             <div class="quote__mark">“</div>
             <div class="quote__body">
-              <div class="quote__title">Bon anniversaire !</div>
+              <div class="quote__title" data-i18n="index.quote.title">Happy birthday!</div>
               <p class="quote__text" id="giftText">
-                J’espère que ce livre te donnera envie de cuisiner des trucs bons, simples, et un peu dangereux.
-                Et surtout : qu’on en fasse ensemble.
+                I hope this book makes you want to cook tasty, simple, slightly dangerous things. And most of all: that we make them together.
               </p>
-              <div class="quote__sig">— signé : moi 😇</div>
+              <div class="quote__sig" data-i18n="index.quote.sig">— signed: me 😇</div>
             </div>
           </div>
 
           <div class="actionsRow">
-            <button class="btn btn--ghost" id="btnCopyLink" type="button"><i class="fa-regular fa-copy"></i><span>Copier le lien</span></button>
-            <button class="btn btn--soft" id="btnQr2" type="button"><i class="fa-solid fa-qrcode"></i><span>QR code</span></button>
+            <button class="btn btn--ghost" id="btnCopyLink" type="button"><i class="fa-regular fa-copy"></i><span data-i18n="index.actions.copy">Copy link</span></button>
+            <!-- <button class="btn btn--soft" id="btnQr2" type="button"><i class="fa-solid fa-qrcode"></i><span data-i18n="index.actions.qr">QR code</span></button> -->
           </div>
         </div>
       </div>
@@ -227,41 +236,41 @@
     <section class="section section--alt" id="chapters">
       <div class="container">
         <div class="section__head">
-          <div class="section__eyebrow">À l’intérieur</div>
-          <h2 class="section__title">Une structure claire, comme un vrai livre</h2>
-          <p class="section__text">Quelques repères pour “feel” le contenu avant de plonger.</p>
+          <div class="section__eyebrow" data-i18n="index.chapters.eyebrow">Inside</div>
+          <h2 class="section__title" data-i18n="index.chapters.title">A clear structure — like a real book</h2>
+          <p class="section__text" data-i18n="index.chapters.text">A few signposts to get a feel before diving in.</p>
         </div>
 
         <div class="timeline">
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__card">
-              <div class="timeline__title">Entrées &amp; petits plaisirs</div>
-              <div class="timeline__text">De quoi lancer un repas ou juste grignoter “pour goûter”.</div>
+              <div class="timeline__title" data-i18n="index.ch1.title">Starters &amp; small pleasures</div>
+              <div class="timeline__text" data-i18n="index.ch1.text">To start a meal… or just snack “for tasting”.</div>
             </div>
           </div>
 
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__card">
-              <div class="timeline__title">Plats “doudou”</div>
-              <div class="timeline__text">Le genre de recettes qui réparent une journée (ou une semaine).</div>
+              <div class="timeline__title" data-i18n="index.ch2.title">Comfort food mains</div>
+              <div class="timeline__text" data-i18n="index.ch2.text">The kind of recipes that fix a day (or a week).</div>
             </div>
           </div>
 
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__card">
-              <div class="timeline__title">Desserts &amp; “wow factor”</div>
-              <div class="timeline__text">Simple, mais avec ce petit twist qui fait dire “ok, c’est sérieux”.</div>
+              <div class="timeline__title" data-i18n="index.ch3.title">Desserts &amp; wow factor</div>
+              <div class="timeline__text" data-i18n="index.ch3.text">Simple — with that tiny twist that makes it feel serious.</div>
             </div>
           </div>
 
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__card">
-              <div class="timeline__title">Notes &amp; astuces</div>
-              <div class="timeline__text">Des détails qui changent tout : cuisson, texture, timing, etc.</div>
+              <div class="timeline__title" data-i18n="index.ch4.title">Notes &amp; tips</div>
+              <div class="timeline__text" data-i18n="index.ch4.text">Little details that change everything: timing, texture, heat…</div>
             </div>
           </div>
         </div>
@@ -272,55 +281,31 @@
     <section class="section" id="gallery">
       <div class="container">
         <div class="section__head">
-          <div class="section__eyebrow">Aperçu</div>
-          <h2 class="section__title">Quelques pages pour se faire une idée</h2>
-          <p class="section__text">Clique pour agrandir, ou passe direct en mode lecture.</p>
+          <div class="section__eyebrow" data-i18n="index.gallery.eyebrow">Preview</div>
+          <h2 class="section__title" data-i18n="index.gallery.title">A few pages to get a feel</h2>
+          <p class="section__text" data-i18n="index.gallery.text">Click to enlarge, or jump straight into reading mode.</p>
         </div>
 
         <div class="gallery">
           <div class="swiper" id="swiper">
             <div class="swiper-wrapper">
-              <div class="swiper-slide"><img src="assets/cover.jpg" alt="Couverture" /></div>
-              <div class="swiper-slide"><img src="assets/sample_10.jpg" alt="Aperçu page" /></div>
-              <div class="swiper-slide"><img src="assets/sample_25.jpg" alt="Aperçu page" /></div>
-              <div class="swiper-slide"><img src="assets/sample_3.jpg" alt="Aperçu page" /></div>
+              <div class="swiper-slide"><img src="assets/cover.jpg" alt="Cover" /></div>
+              <div class="swiper-slide"><img src="assets/sample_10.jpg" alt="Sample page" /></div>
+              <div class="swiper-slide"><img src="assets/sample_25.jpg" alt="Sample page" /></div>
+              <div class="swiper-slide"><img src="assets/sample_3.jpg" alt="Sample page" /></div>
             </div>
             <div class="swiper-pagination"></div>
-            <div class="swiper-button-prev" aria-label="Précédent"></div>
-            <div class="swiper-button-next" aria-label="Suivant"></div>
+            <div class="swiper-button-prev" aria-label="Previous"></div>
+            <div class="swiper-button-next" aria-label="Next"></div>
           </div>
 
           <div class="gallery__cta">
             <div class="gallery__card">
-              <div class="gallery__title">Envie de le lire “comme un vrai livre” ?</div>
-              <div class="gallery__text">Le lecteur a une animation de pages, un mode 1 page / double page, zoom et plein écran.</div>
+              <div class="gallery__title" data-i18n="index.gallery.cardTitle">Want to read it “like a real book”?</div>
+              <div class="gallery__text" data-i18n="index.gallery.cardText">The reader has page-turn animation, single/double page, zoom and fullscreen.</div>
               <div class="gallery__actions">
-                <a class="btn btn--primary" id="readerLinkGallery" href="reader.html"><i class="fa-solid fa-book-open"></i><span>Feuilleter</span></a>
-                <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span>PDF</span></a>
-              </div>
-            </div>
-
-            <div class="miniCards">
-              <div class="miniCard">
-                <i class="fa-solid fa-sparkles"></i>
-                <div>
-                  <div class="miniCard__title">Animations &amp; style</div>
-                  <div class="miniCard__text">Un rendu propre, pas juste un lien Dropbox.</div>
-                </div>
-              </div>
-              <div class="miniCard">
-                <i class="fa-solid fa-mobile-screen"></i>
-                <div>
-                  <div class="miniCard__title">Responsive</div>
-                  <div class="miniCard__text">OK sur mobile, tablette, desktop.</div>
-                </div>
-              </div>
-              <div class="miniCard">
-                <i class="fa-solid fa-lock"></i>
-                <div>
-                  <div class="miniCard__title">Statique</div>
-                  <div class="miniCard__text">Tu héberges où tu veux, zéro backend.</div>
-                </div>
+                <a class="btn btn--primary" id="readerLinkGallery" href="reader.html"><i class="fa-solid fa-book-open"></i><span data-i18n="index.gallery.flip">Flip through</span></a>
+                <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span data-i18n="common.pdf">PDF</span></a>
               </div>
             </div>
           </div>
@@ -333,33 +318,31 @@
       <div class="container">
         <div class="cta__card">
           <div class="cta__left">
-            <div class="cta__eyebrow">Let’s go</div>
-            <h2 class="cta__title">Prête à tourner les pages ?</h2>
-            <p class="cta__text">
-              Feuillette la version digitale maintenant.
-              Et quand la version imprimée arrive… c’est la vraie expérience “livre” en bonus.
+            <div class="cta__eyebrow" data-i18n="index.cta.eyebrow">Let’s go</div>
+            <h2 class="cta__title" data-i18n="index.cta.title">Ready to turn the pages?</h2>
+            <p class="cta__text" data-i18n="index.cta.text">
+              Flip through the digital version now. And when the printed version arrives… you get the “real book” experience as a bonus.
             </p>
             <div class="cta__actions">
-              <a class="btn btn--primary" id="readerLinkCta" href="reader.html"><i class="fa-solid fa-book-open"></i><span>Ouvrir le lecteur</span></a>
-              <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span>Télécharger</span></a>
-              <button class="btn btn--soft" id="btnQr3" type="button"><i class="fa-solid fa-qrcode"></i><span>QR</span></button>
+              <a class="btn btn--primary" id="readerLinkCta" href="reader.html"><i class="fa-solid fa-book-open"></i><span data-i18n="index.cta.openReader">Open reader</span></a>
+              <a class="btn btn--ghost" href="book.pdf" download><i class="fa-solid fa-download"></i><span data-i18n="common.download">Download</span></a>
+              <!-- <button class="btn btn--soft" id="btnQr3" type="button"><i class="fa-solid fa-qrcode"></i><span data-i18n="common.qr">QR</span></button> -->
             </div>
           </div>
 
           <div class="cta__right">
             <div class="printCard">
               <div class="printCard__top">
-                <div class="printCard__badge"><i class="fa-solid fa-gift"></i> édition imprimée</div>
-                <div class="printCard__title">Bientôt livrée</div>
+                <div class="printCard__badge"><i class="fa-solid fa-gift"></i> <span data-i18n="index.print.badge">printed edition</span></div>
+                <div class="printCard__title" data-i18n="index.print.title">Coming soon</div>
               </div>
-              <div class="printCard__text">
-                Le papier met un peu plus de temps, mais il arrive.
-                En attendant : la version digitale est déjà prête et super agréable à lire.
+              <div class="printCard__text" data-i18n="index.print.text">
+                Paper takes a bit longer, but it’s on the way. Meanwhile: the digital version is ready and very pleasant to read.
               </div>
               <div class="printCard__bar">
                 <div class="printCard__barFill" style="width: 72%"></div>
               </div>
-              <div class="printCard__meta muted tiny">Progression (très scientifique) : 72%</div>
+              <div class="printCard__meta muted tiny" id="progressLabel">Progress (very scientific): 72%</div>
             </div>
           </div>
         </div>
@@ -367,8 +350,8 @@
         <footer class="footer">
           <div class="footer__line"></div>
           <div class="footer__inner">
-            <div class="footer__left muted tiny">Fait avec ❤️, du beurre, et un peu trop d’obsession pour les détails.</div>
-            <a class="footer__top" href="#top" aria-label="Retour en haut"><i class="fa-solid fa-arrow-up"></i></a>
+            <div class="footer__left muted tiny" data-i18n="index.footer.text">Made with ❤️, butter, and a slightly unhealthy obsession for details.</div>
+            <a class="footer__top" href="#top" data-i18n-aria="index.footer.toTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></a>
           </div>
         </footer>
       </div>
@@ -377,6 +360,7 @@
 
   <canvas id="fx" class="fx" aria-hidden="true"></canvas>
 
+  <script defer src="i18n.js"></script>
   <script defer src="main.js"></script>
 </body>
 </html>
