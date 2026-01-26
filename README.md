@@ -1,38 +1,23 @@
-# Site cadeau — *Mes recettes personnelles*
+# Mes recettes personnelles
 
-Ce zip contient un mini site statique (HTML/CSS/JS) :
+This project is a firebase project for my personal portfolio.
 
-- `index.html` : page de présentation / landing (style portfolio)
-- `reader.html` : lecteur “flipbook” (page séparée)
-- `book.pdf` : le manuscrit (à remplacer si besoin)
+The website is accessible here: [https://mes-recettes-personnelles.web.app/](https://mes-recettes-personnelles.web.app/).
 
-## Lancer en local
+### Architecture
 
-Comme c’est un site statique, le plus simple :
+- public: for the public part of the website. This is located in the `public` directory.
 
-### Option A — Python
-```bash
-cd recettes-birthday-site-v2
-python -m http.server 8000
+### Deployment
+
+Deploy all (admin backoffice + public website):
+
 ```
-Puis ouvre `http://localhost:8000`.
-
-### Option B — Node
-```bash
-npx serve .
+make deploy
 ```
 
-## Personnalisation rapide
+Deploy only website (public):
 
-- Message : `index.html` (sections HERO / “Bon anniversaire”)
-- Prénom (optionnel) : ajoute `?to=Prénom` à l’URL (ça personnalise le titre et le texte cadeau)
-- Remplacer le PDF : écrase `book.pdf` (garde le même nom).
-  - Astuce : si tu changes le PDF, tu peux aussi mettre à jour l’aperçu dans `assets/` (images).
-
-## Reader (flipbook)
-
-Le lecteur utilise :
-- **pdf.js** (rendu du PDF en canvas)
-- **StPageFlip** (page turning)
-
-Le mode **1 page** est un vrai mode “portrait” via `updateOrientation('portrait')` (pas un simple crop).
+```
+make deploy-public
+```
