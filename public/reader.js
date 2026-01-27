@@ -39,15 +39,18 @@
     lastFlipAt: 0,
     base: { w: 420, h: 560 },
     renderScale: 1.2,
-  
-};
+  };
 
   // Persistence (last page / zoom / layout)
   const STORAGE_KEY = "mpr_reader_state_v1";
   const qs = new URLSearchParams(location.search);
 
   function loadSavedState() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    } catch {
+      return null;
+    }
   }
   const saved = loadSavedState();
 
@@ -56,11 +59,25 @@
   state.startIndex =
     Number.isFinite(qsPage) && qsPage > 0
       ? qsPage - 1
-      : (Number.isFinite(saved?.pageIndex) ? saved.pageIndex : 0);
+      : Number.isFinite(saved?.pageIndex)
+      ? saved.pageIndex
+      : 0;
 
   // Restore layout/zoom when not explicitly dictated by URL (future-proof)
-  if (saved && !qs.get("layout") && (saved.layout === "single" || saved.layout === "two")) state.layout = saved.layout;
-  if (saved && !qs.get("zoom") && typeof saved.zoom === "number" && saved.zoom > 0.25 && saved.zoom < 4) state.zoom = saved.zoom;
+  if (
+    saved &&
+    !qs.get("layout") &&
+    (saved.layout === "single" || saved.layout === "two")
+  )
+    state.layout = saved.layout;
+  if (
+    saved &&
+    !qs.get("zoom") &&
+    typeof saved.zoom === "number" &&
+    saved.zoom > 0.25 &&
+    saved.zoom < 4
+  )
+    state.zoom = saved.zoom;
 
   let _saveT = null;
   function scheduleSave() {
@@ -68,11 +85,14 @@
     _saveT = setTimeout(() => {
       try {
         const pageIndex = getCurrentIndex();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          pageIndex,
-          zoom: state.zoom,
-          layout: state.layout
-        }));
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            pageIndex,
+            zoom: state.zoom,
+            layout: state.layout,
+          })
+        );
       } catch {}
     }, 250);
   }
@@ -82,54 +102,100 @@
     const root = document.getElementById("rbgBalls");
     if (!root) return;
 
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-
     const palette = [
-      ["rgba(255,122,73,0.95)", "rgba(202,161,92,0.75)"],
-      ["rgba(111,125,75,0.85)", "rgba(202,161,92,0.55)"],
-      ["rgba(162,78,122,0.78)", "rgba(255,122,73,0.55)"],
-      ["rgba(202,161,92,0.80)", "rgba(245,241,232,0.20)"],
+      ["rgba(255,122,73,0.92)", "rgba(202,161,92,0.70)"],
+      ["rgba(111,125,75,0.78)", "rgba(202,161,92,0.55)"],
+      ["rgba(162,78,122,0.70)", "rgba(255,122,73,0.52)"],
+      ["rgba(202,161,92,0.74)", "rgba(245,241,232,0.18)"],
     ];
 
-    const count = Math.min(10, Math.max(6, Math.round((window.innerWidth || 1200) / 220)));
+    const prefersReducedMotion =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const lowPower =
+      window.matchMedia &&
+      window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+
+    root.classList.toggle("is-lite", lowPower);
+
     const balls = [];
+
+    const count = lowPower
+      ? Math.min(8, Math.max(4, Math.round((window.innerWidth || 400) / 320)))
+      : Math.min(18, Math.max(8, Math.round((window.innerWidth || 400) / 220)));
+
     for (let i = 0; i < count; i++) {
       const el = document.createElement("div");
       el.className = "ball";
       const [c1, c2] = palette[i % palette.length];
 
       const side = Math.random() < 0.5 ? "left" : "right";
-      const x = side === "left" ? (-6 + Math.random() * 22) : (106 - Math.random() * 22);
+      const x =
+        side === "left" ? -6 + Math.random() * 22 : 106 - Math.random() * 22;
       const y = 8 + Math.random() * 84;
-      const s = 110 + Math.random() * 240;
+
+      const s = (lowPower ? 90 : 110) + Math.random() * (lowPower ? 200 : 240);
 
       el.style.setProperty("--x", `${x.toFixed(2)}vw`);
       el.style.setProperty("--y", `${y.toFixed(2)}vh`);
       el.style.setProperty("--s", `${s.toFixed(0)}px`);
       el.style.setProperty("--c1", c1);
       el.style.setProperty("--c2", c2);
-      el.style.setProperty("--a", (0.10 + Math.random() * 0.14).toFixed(2));
-      el.style.setProperty("--d", `${(14 + Math.random() * 14).toFixed(2)}s`);
+      el.style.setProperty(
+        "--a",
+        (0.1 + Math.random() * (lowPower ? 0.1 : 0.14)).toFixed(2)
+      );
+
+      // Slower + smaller movement on mobile
+      el.style.setProperty(
+        "--d",
+        `${(lowPower
+          ? 18 + Math.random() * 18
+          : 14 + Math.random() * 14
+        ).toFixed(2)}s`
+      );
       el.style.setProperty("--delay", `${(-Math.random() * 10).toFixed(2)}s`);
-      el.style.setProperty("--mx", `${(-14 + Math.random() * 28).toFixed(0)}px`);
-      el.style.setProperty("--my", `${(-20 + Math.random() * 40).toFixed(0)}px`);
+      el.style.setProperty(
+        "--mx",
+        `${(lowPower
+          ? -10 + Math.random() * 20
+          : -14 + Math.random() * 28
+        ).toFixed(0)}px`
+      );
+      el.style.setProperty(
+        "--my",
+        `${(lowPower
+          ? -14 + Math.random() * 28
+          : -20 + Math.random() * 40
+        ).toFixed(0)}px`
+      );
+
       root.appendChild(el);
       balls.push(el);
     }
 
-    if (prefersReducedMotion) return;
+    // IMPORTANT: no per-frame parallax loop on mobile / low-power devices
+    if (prefersReducedMotion || lowPower) return;
 
-    let tx = 0, ty = 0, px = 0, py = 0;
-    window.addEventListener("pointermove", (e) => {
-      tx = (e.clientX / window.innerWidth) - 0.5;
-      ty = (e.clientY / window.innerHeight) - 0.5;
-    }, { passive: true });
+    let tx = 0,
+      ty = 0,
+      px = 0,
+      py = 0;
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        tx = e.clientX / window.innerWidth - 0.5;
+        ty = e.clientY / window.innerHeight - 0.5;
+      },
+      { passive: true }
+    );
 
     const tick = () => {
       px += (tx - px) * 0.08;
       py += (ty - py) * 0.08;
       for (let i = 0; i < balls.length; i++) {
-        const depth = (i % 6 + 1) / 6;
+        const depth = ((i % 6) + 1) / 6;
         balls[i].style.setProperty("--px", `${(px * depth * 20).toFixed(2)}px`);
         balls[i].style.setProperty("--py", `${(py * depth * 14).toFixed(2)}px`);
       }
@@ -179,13 +245,15 @@
     const m = tr.match(/matrix\(([^)]+)\)/);
     if (m) {
       const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
-      const a = parts[0], b = parts[1];
+      const a = parts[0],
+        b = parts[1];
       return Math.sqrt(a * a + b * b) || 1;
     }
     const m3 = tr.match(/matrix3d\(([^)]+)\)/);
     if (m3) {
       const parts = m3[1].split(",").map((x) => parseFloat(x.trim()));
-      const a = parts[0], b = parts[1];
+      const a = parts[0],
+        b = parts[1];
       return Math.sqrt(a * a + b * b) || 1;
     }
     return 1;
@@ -242,11 +310,14 @@
 
   function getCurrentIndex() {
     try {
-      if (state.pageFlip && state.pageFlip.getCurrentPageIndex) return state.pageFlip.getCurrentPageIndex();
+      if (state.pageFlip && state.pageFlip.getCurrentPageIndex)
+        return state.pageFlip.getCurrentPageIndex();
     } catch {}
     // fallback: restore or parse from input
     const n = Number(pageInput?.value || 1);
-    const fallback = Number.isFinite(state.startIndex) ? state.startIndex : ((Number.isFinite(n) ? n : 1) - 1);
+    const fallback = Number.isFinite(state.startIndex)
+      ? state.startIndex
+      : (Number.isFinite(n) ? n : 1) - 1;
     return clamp(fallback, 0, Math.max(0, state.total - 1));
   }
 
@@ -263,7 +334,8 @@
   function updatePageUI(idx0) {
     const current = clamp(idx0, 0, Math.max(0, state.total - 1));
     if (pageInput) pageInput.value = String(current + 1);
-    if (pageLabel) pageLabel.textContent = `${current + 1} / ${state.total || "—"}`;
+    if (pageLabel)
+      pageLabel.textContent = `${current + 1} / ${state.total || "—"}`;
   }
 
   function setLayoutUI(layout) {
@@ -272,8 +344,22 @@
 
     // Update labels (some are i18n-driven, but these two are dynamic)
     const t = i18n()?.t;
-    if (modeLabelEl) modeLabelEl.textContent = t ? t(layout === "single" ? "reader.mode.single" : "reader.mode.two") : (layout === "single" ? "Single page" : "Two-page");
-    if (layoutLabel) layoutLabel.textContent = t ? t(layout === "single" ? "reader.toggleLabel.two" : "reader.toggleLabel.single") : (layout === "single" ? "Two-page" : "Single page");
+    if (modeLabelEl)
+      modeLabelEl.textContent = t
+        ? t(layout === "single" ? "reader.mode.single" : "reader.mode.two")
+        : layout === "single"
+        ? "Single page"
+        : "Two-page";
+    if (layoutLabel)
+      layoutLabel.textContent = t
+        ? t(
+            layout === "single"
+              ? "reader.toggleLabel.two"
+              : "reader.toggleLabel.single"
+          )
+        : layout === "single"
+        ? "Two-page"
+        : "Single page";
     scheduleSave();
   }
 
@@ -298,7 +384,10 @@
         // Keep our forced layout stable
         requestAnimationFrame(() => {
           try {
-            if (pf.updateOrientation) pf.updateOrientation(state.layout === "single" ? "portrait" : "landscape");
+            if (pf.updateOrientation)
+              pf.updateOrientation(
+                state.layout === "single" ? "portrait" : "landscape"
+              );
             if (pf.update) pf.update();
           } catch {}
         });
@@ -332,7 +421,11 @@
     // If supported by library, portrait orientation can be enforced after init with updateOrientation.
     // Keeping usePortrait true also allows it to behave on small screens.
     // We'll force orientation explicitly in rebuild().
-    common.startPage = clamp(getCurrentIndex(), 0, Math.max(0, state.total - 1));
+    common.startPage = clamp(
+      getCurrentIndex(),
+      0,
+      Math.max(0, state.total - 1)
+    );
     common.showCover = !portraitForced; // nicer in two-page, less confusing in single
     return common;
   }
@@ -377,7 +470,10 @@
     // Force orientation to match selected layout (this is the key fix for single-page mode)
     requestAnimationFrame(() => {
       try {
-        if (pf.updateOrientation) pf.updateOrientation(state.layout === "single" ? "portrait" : "landscape");
+        if (pf.updateOrientation)
+          pf.updateOrientation(
+            state.layout === "single" ? "portrait" : "landscape"
+          );
         if (pf.update) pf.update();
       } catch {}
       // Go back to index (some builds ignore startPage)
@@ -420,7 +516,7 @@
     // First page defines ratio
     const firstPage = await pdf.getPage(1);
     const vp0 = firstPage.getViewport({ scale: state.renderScale });
-    const ratio = vp0.width / vp0.height || (3 / 4);
+    const ratio = vp0.width / vp0.height || 3 / 4;
     state.base.h = 620;
     state.base.w = Math.round(state.base.h * ratio);
 
@@ -456,7 +552,11 @@
     // Render sequentially (stable + shows progress)
     for (let n = 1; n <= state.total; n++) {
       const pct = 8 + Math.round((n / Math.max(1, state.total)) * 84);
-      setProgress(pct, (i18n()?.t("reader.loading.sub") || "Rendering…") + ` (${n}/${state.total})`);
+      setProgress(
+        pct,
+        (i18n()?.t("reader.loading.sub") || "Rendering…") +
+          ` (${n}/${state.total})`
+      );
       frag.appendChild(await renderOne(n));
     }
 
@@ -540,7 +640,8 @@
       if (e.key === "ArrowRight") flipNext();
       if (e.key === "+") setZoom(state.zoom + 0.1);
       if (e.key === "-") setZoom(state.zoom - 0.1);
-      if (e.key === "Escape" && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      if (e.key === "Escape" && document.fullscreenElement)
+        document.exitFullscreen().catch(() => {});
     });
 
     // Resize
@@ -548,7 +649,10 @@
       "resize",
       debounce(() => {
         try {
-          if (state.pageFlip?.updateOrientation) state.pageFlip.updateOrientation(state.layout === "single" ? "portrait" : "landscape");
+          if (state.pageFlip?.updateOrientation)
+            state.pageFlip.updateOrientation(
+              state.layout === "single" ? "portrait" : "landscape"
+            );
           if (state.pageFlip?.update) state.pageFlip.update();
         } catch {}
         applyZoom();
@@ -585,10 +689,16 @@
       });
 
     try {
-      await waitFor(() => window.pdfjsLib && getPageFlipCtor() && bookEl, 15000);
+      await waitFor(
+        () => window.pdfjsLib && getPageFlipCtor() && bookEl,
+        15000
+      );
     } catch {
       setLoading(false);
-      if (loadingSub) loadingSub.textContent = (i18n()?.t("reader.error.libs") || "Failed to load reader dependencies.");
+      if (loadingSub)
+        loadingSub.textContent =
+          i18n()?.t("reader.error.libs") ||
+          "Failed to load reader dependencies.";
       return;
     }
 
@@ -602,7 +712,9 @@
       setTimeout(sanityCheckZoom, 700);
     } catch (e) {
       setLoading(false);
-      if (loadingSub) loadingSub.textContent = (i18n()?.t("reader.error.pdf") || "Failed to load the PDF.");
+      if (loadingSub)
+        loadingSub.textContent =
+          i18n()?.t("reader.error.pdf") || "Failed to load the PDF.";
       console.error(e);
     }
   }

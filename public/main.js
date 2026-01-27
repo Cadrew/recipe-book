@@ -2,7 +2,9 @@
 (function () {
   const i18n = window.i18n;
 
-  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Helpers
   const getQS = () => new URLSearchParams(location.search);
@@ -13,121 +15,187 @@
     history.replaceState(null, "", u.pathname + u.search + u.hash);
   }
 
+  let cookbookBallsCleanup = null;
 
-// Decorative "color balls" background (book-inspired)
-function setupCookbookBalls() {
-  const root = document.getElementById("bgBalls") || (() => {
-    // Fallback (in case markup was removed): inject the scroll-flowing layer right
-    // after the fixed background.
-    const bg = document.querySelector(".bg");
-    const div = document.createElement("div");
-    div.className = "bg__balls bg__balls--flow";
-    div.id = "bgBalls";
-    div.setAttribute("aria-hidden", "true");
-    if (bg && bg.parentNode) {
-      bg.parentNode.insertBefore(div, bg.nextSibling);
-    } else {
-      document.body.appendChild(div);
+  // Decorative "color balls" background (book-inspired)
+  function setupCookbookBalls() {
+    // If called multiple times (langchange, hot reload, etc.), cleanup previous loop/listeners.
+    if (typeof cookbookBallsCleanup === "function") {
+      cookbookBallsCleanup();
+      cookbookBallsCleanup = null;
     }
-    return div;
-  })();
 
-  if (!root) return;
+    const root =
+      document.getElementById("bgBalls") ||
+      (() => {
+        const bg = document.querySelector(".bg");
+        const div = document.createElement("div");
+        div.className = "bg__balls bg__balls--flow";
+        div.id = "bgBalls";
+        div.setAttribute("aria-hidden", "true");
+        if (bg && bg.parentNode) {
+          bg.parentNode.insertBefore(div, bg.nextSibling);
+        } else {
+          document.body.appendChild(div);
+        }
+        return div;
+      })();
 
-  const palette = [
-    ["rgba(255,122,73,0.95)", "rgba(202,161,92,0.75)"], // tomato -> brass
-    ["rgba(111,125,75,0.85)", "rgba(202,161,92,0.55)"], // sage -> brass
-    ["rgba(162,78,122,0.78)", "rgba(255,122,73,0.55)"], // berry -> tomato
-    ["rgba(202,161,92,0.80)", "rgba(245,241,232,0.20)"], // brass -> cream
-  ];
+    if (!root) return;
 
-  const balls = [];
+    const isLowPower = () =>
+      !!(
+        window.matchMedia &&
+        window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
+      );
 
-  function getDocHeight() {
-    const b = document.body;
-    const e = document.documentElement;
-    return Math.max(
-      b?.scrollHeight || 0,
-      b?.offsetHeight || 0,
-      e?.scrollHeight || 0,
-      e?.offsetHeight || 0,
-      e?.clientHeight || 0
-    );
+    const palette = [
+      ["rgba(255,122,73,0.95)", "rgba(202,161,92,0.75)"],
+      ["rgba(111,125,75,0.85)", "rgba(202,161,92,0.55)"],
+      ["rgba(162,78,122,0.78)", "rgba(255,122,73,0.55)"],
+      ["rgba(202,161,92,0.80)", "rgba(245,241,232,0.20)"],
+    ];
+
+    const balls = [];
+
+    function getDocHeight() {
+      const b = document.body;
+      const e = document.documentElement;
+      return Math.max(
+        b?.scrollHeight || 0,
+        b?.offsetHeight || 0,
+        e?.scrollHeight || 0,
+        e?.offsetHeight || 0,
+        e?.clientHeight || 0
+      );
+    }
+
+    function rebuildBalls() {
+      const lowPower = isLowPower();
+      root.classList.toggle("is-lite", lowPower);
+
+      const docH = getDocHeight();
+      root.style.height = `${docH}px`;
+      root.textContent = "";
+      balls.length = 0;
+
+      const screens = Math.max(
+        1,
+        Math.ceil(docH / Math.max(1, window.innerHeight))
+      );
+      const perScreen = lowPower ? 3 : window.innerWidth < 520 ? 5 : 7;
+
+      const minCount = lowPower ? 10 : 18;
+      const maxCount = lowPower ? 32 : 64;
+      const count = Math.min(maxCount, Math.max(minCount, screens * perScreen));
+
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement("div");
+        el.className = "ball";
+        const [c1, c2] = palette[i % palette.length];
+
+        const side = Math.random() < 0.5 ? "left" : "right";
+        const x =
+          side === "left" ? -5 + Math.random() * 22 : 105 - Math.random() * 22;
+
+        const t = (i + Math.random()) / count;
+        const y = 90 + t * Math.max(0, docH - 180);
+
+        const s = (lowPower ? 80 : 90) + Math.random() * (lowPower ? 180 : 240);
+
+        el.style.setProperty("--x", `${x.toFixed(2)}vw`);
+        el.style.setProperty("--y", `${y.toFixed(0)}px`);
+        el.style.setProperty("--s", `${s.toFixed(0)}px`);
+        el.style.setProperty("--c1", c1);
+        el.style.setProperty("--c2", c2);
+        el.style.setProperty(
+          "--a",
+          (0.11 + Math.random() * (lowPower ? 0.12 : 0.16)).toFixed(2)
+        );
+
+        // Slower + smaller wandering on low-power devices
+        el.style.setProperty(
+          "--d",
+          `${(lowPower
+            ? 14 + Math.random() * 16
+            : 8 + Math.random() * 10
+          ).toFixed(2)}s`
+        );
+        el.style.setProperty("--delay", `${(-Math.random() * 10).toFixed(2)}s`);
+        el.style.setProperty(
+          "--mx",
+          `${(lowPower
+            ? -26 + Math.random() * 52
+            : -44 + Math.random() * 88
+          ).toFixed(0)}px`
+        );
+        el.style.setProperty(
+          "--my",
+          `${(lowPower
+            ? -52 + Math.random() * 104
+            : -84 + Math.random() * 168
+          ).toFixed(0)}px`
+        );
+
+        root.appendChild(el);
+        balls.push(el);
+      }
+    }
+
+    rebuildBalls();
+
+    let resizeT = 0;
+    const onResize = () => {
+      window.clearTimeout(resizeT);
+      resizeT = window.setTimeout(rebuildBalls, 160);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+
+    const onLoad = () => window.setTimeout(rebuildBalls, 50);
+    window.addEventListener("load", onLoad, { once: true });
+
+    const enableParallax = !prefersReducedMotion && !isLowPower();
+    if (!enableParallax) {
+      cookbookBallsCleanup = () => {
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("load", onLoad);
+        window.clearTimeout(resizeT);
+      };
+      return;
+    }
+
+    // Tiny parallax that makes the balls feel "alive" (desktop only)
+    let tx = 0,
+      ty = 0,
+      px = 0,
+      py = 0;
+    const onPointerMove = (e) => {
+      tx = e.clientX / window.innerWidth - 0.5;
+      ty = e.clientY / window.innerHeight - 0.5;
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    let rafId = 0;
+    const tick = () => {
+      px += (tx - px) * 0.08;
+      py += (ty - py) * 0.08;
+      for (let i = 0; i < balls.length; i++) {
+        const depth = ((i % 6) + 1) / 6;
+        balls[i].style.setProperty("--px", `${(px * depth * 22).toFixed(2)}px`);
+        balls[i].style.setProperty("--py", `${(py * depth * 16).toFixed(2)}px`);
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+
+    cookbookBallsCleanup = () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("load", onLoad);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.clearTimeout(resizeT);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }
-
-  function rebuildBalls() {
-    const docH = getDocHeight();
-    // Ensure the layer spans the whole scrollable document.
-    root.style.height = `${docH}px`;
-    root.textContent = "";
-    balls.length = 0;
-
-    const screens = Math.max(1, Math.ceil(docH / Math.max(1, window.innerHeight)));
-    const perScreen = window.innerWidth < 520 ? 5 : 7;
-    const count = Math.min(64, Math.max(18, screens * perScreen));
-
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement("div");
-      el.className = "ball";
-      const [c1, c2] = palette[i % palette.length];
-
-      const side = Math.random() < 0.5 ? "left" : "right";
-      const x = side === "left" ? (-5 + Math.random() * 22) : (105 - Math.random() * 22); // hug edges
-
-      // Stratified distribution so you discover new balls as you scroll.
-      const t = (i + Math.random()) / count;
-      const y = 90 + t * Math.max(0, docH - 180);
-
-      const s = 90 + Math.random() * 240;
-
-      el.style.setProperty("--x", `${x.toFixed(2)}vw`);
-      el.style.setProperty("--y", `${y.toFixed(0)}px`);
-      el.style.setProperty("--s", `${s.toFixed(0)}px`);
-      el.style.setProperty("--c1", c1);
-      el.style.setProperty("--c2", c2);
-      el.style.setProperty("--a", (0.11 + Math.random() * 0.16).toFixed(2));
-      // Faster + wider wandering so they feel more "alive".
-      el.style.setProperty("--d", `${(8 + Math.random() * 10).toFixed(2)}s`);
-      el.style.setProperty("--delay", `${(-Math.random() * 10).toFixed(2)}s`);
-      el.style.setProperty("--mx", `${(-44 + Math.random() * 88).toFixed(0)}px`);
-      el.style.setProperty("--my", `${(-84 + Math.random() * 168).toFixed(0)}px`);
-
-      root.appendChild(el);
-      balls.push(el);
-    }
-  }
-
-  rebuildBalls();
-
-  // Keep in sync with viewport changes and late-loading assets.
-  let resizeT = 0;
-  window.addEventListener("resize", () => {
-    window.clearTimeout(resizeT);
-    resizeT = window.setTimeout(rebuildBalls, 160);
-  }, { passive: true });
-  window.addEventListener("load", () => window.setTimeout(rebuildBalls, 50), { once: true });
-
-  if (prefersReducedMotion) return;
-
-  // Tiny parallax that makes the balls feel "alive"
-  let tx = 0, ty = 0, px = 0, py = 0;
-  window.addEventListener("pointermove", (e) => {
-    tx = (e.clientX / window.innerWidth) - 0.5;
-    ty = (e.clientY / window.innerHeight) - 0.5;
-  }, { passive: true });
-
-  const tick = () => {
-    px += (tx - px) * 0.08;
-    py += (ty - py) * 0.08;
-    for (let i = 0; i < balls.length; i++) {
-      const depth = (i % 6 + 1) / 6;
-      balls[i].style.setProperty("--px", `${(px * depth * 22).toFixed(2)}px`);
-      balls[i].style.setProperty("--py", `${(py * depth * 16).toFixed(2)}px`);
-    }
-    requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
   function updateProgressLabel() {
     const el = document.getElementById("progressLabel");
     if (!el || !i18n) return;
@@ -139,18 +207,30 @@ function setupCookbookBalls() {
     const qs = getQS();
     const DEFAULT_PAGES = 66;
     const pagesFromQS = Number(qs.get("pages"));
-    const pages = Number.isFinite(pagesFromQS) && pagesFromQS > 0 ? pagesFromQS : DEFAULT_PAGES;
+    const pages =
+      Number.isFinite(pagesFromQS) && pagesFromQS > 0
+        ? pagesFromQS
+        : DEFAULT_PAGES;
     const pageCount = document.getElementById("pageCount");
     if (pageCount) pageCount.textContent = String(pages);
   }
 
   function updateReaderLinks() {
     const qs = getQS();
-    const readerLinks = ["readerLinkTop", "readerLinkHero", "readerLinkGallery", "readerLinkCta", "readerLinkMobile"];
+    const readerLinks = [
+      "readerLinkTop",
+      "readerLinkHero",
+      "readerLinkGallery",
+      "readerLinkCta",
+      "readerLinkMobile",
+    ];
     for (const id of readerLinks) {
       const a = document.getElementById(id);
       if (!a) continue;
-      const url = new URL(a.getAttribute("href") || "reader.html", location.href);
+      const url = new URL(
+        a.getAttribute("href") || "reader.html",
+        location.href
+      );
       // Keep all query params (to, pages, lang, etc)
       for (const [k, v] of qs.entries()) url.searchParams.set(k, v);
       a.setAttribute("href", url.pathname + url.search);
@@ -162,10 +242,12 @@ function setupCookbookBalls() {
     const to = qs.get("to")?.trim();
 
     const heroTo = document.getElementById("heroTo");
-    if (heroTo && i18n) heroTo.textContent = i18n.t("dyn.heroTo", { name: to || "" });
+    if (heroTo && i18n)
+      heroTo.textContent = i18n.t("dyn.heroTo", { name: to || "" });
 
     const giftText = document.getElementById("giftText");
-    if (giftText && i18n) giftText.textContent = i18n.t("dyn.giftText", { name: to || "" });
+    if (giftText && i18n)
+      giftText.textContent = i18n.t("dyn.giftText", { name: to || "" });
   }
 
   // Apply translations ASAP (defer scripts run after DOM is parsed)
@@ -189,7 +271,7 @@ function setupCookbookBalls() {
     updateProgressLabel();
     applyPersonalization();
 
-  setupCookbookBalls();
+    setupCookbookBalls();
   });
 
   // Remove loading veil
@@ -206,9 +288,13 @@ function setupCookbookBalls() {
     navmobile.classList.toggle("is-open", open);
     navmobile.setAttribute("aria-hidden", open ? "false" : "true");
   }
-  burger?.addEventListener("click", () => openMobile(!navmobile?.classList.contains("is-open")));
+  burger?.addEventListener("click", () =>
+    openMobile(!navmobile?.classList.contains("is-open"))
+  );
   closeMobile?.addEventListener("click", () => openMobile(false));
-  navmobile?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => openMobile(false)));
+  navmobile
+    ?.querySelectorAll("a")
+    .forEach((a) => a.addEventListener("click", () => openMobile(false)));
 
   // Smooth anchor scroll (preserve query params)
   document.querySelectorAll('a[href^="#"]').forEach((a) => {
@@ -256,11 +342,16 @@ function setupCookbookBalls() {
   function renderQr(targetUrl) {
     if (!qrBox) return;
 
-    const opts = { width: 260, margin: 2, color: { dark: "#111318", light: "#f5f1e8" } };
+    const opts = {
+      width: 260,
+      margin: 2,
+      color: { dark: "#111318", light: "#f5f1e8" },
+    };
     qrBox.innerHTML = "";
 
     if (!window.QRCode || typeof window.QRCode.toCanvas !== "function") {
-      qrBox.textContent = i18n?.t("qr.error") || "Couldn't generate the QR code.";
+      qrBox.textContent =
+        i18n?.t("qr.error") || "Couldn't generate the QR code.";
       return;
     }
 
@@ -272,7 +363,8 @@ function setupCookbookBalls() {
         qrBox.appendChild(canvas);
         qrRenderedKey = targetUrl;
       } else {
-        qrBox.textContent = i18n?.t("qr.error") || "Couldn't generate the QR code.";
+        qrBox.textContent =
+          i18n?.t("qr.error") || "Couldn't generate the QR code.";
       }
     };
 
@@ -332,14 +424,16 @@ function setupCookbookBalls() {
   });
 
   // Copy link
-  document.getElementById("btnCopyLink")?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      toast(i18n?.t("toast.linkCopied") || "Link copied ✨");
-    } catch {
-      toast(i18n?.t("toast.copyFailed") || "Copy failed (browser).");
-    }
-  });
+  document
+    .getElementById("btnCopyLink")
+    ?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        toast(i18n?.t("toast.linkCopied") || "Link copied ✨");
+      } catch {
+        toast(i18n?.t("toast.copyFailed") || "Copy failed (browser).");
+      }
+    });
 
   // Swiper gallery
   if (window.Swiper) {
@@ -351,7 +445,10 @@ function setupCookbookBalls() {
       slidesPerView: 1,
       spaceBetween: 10,
       pagination: { el: ".swiper-pagination", clickable: true },
-      navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
       keyboard: { enabled: true },
     });
   }
@@ -364,10 +461,13 @@ function setupCookbookBalls() {
       const r = tilt.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5;
       const y = (e.clientY - r.top) / r.height - 0.5;
-      tilt.style.transform = `perspective(1200px) rotateY(${(-12 + x * strength)}deg) rotateX(${(6 - y * strength)}deg)`;
+      tilt.style.transform = `perspective(1200px) rotateY(${
+        -12 + x * strength
+      }deg) rotateX(${6 - y * strength}deg)`;
     });
     tilt.addEventListener("mouseleave", () => {
-      tilt.style.transform = "perspective(1200px) rotateY(-12deg) rotateX(6deg)";
+      tilt.style.transform =
+        "perspective(1200px) rotateY(-12deg) rotateX(6deg)";
     });
   }
 
@@ -382,19 +482,21 @@ function setupCookbookBalls() {
       { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", stagger: 0.06 }
     );
 
-    gsap.utils.toArray(".panel, .timeline__item, .gallery__card, .miniCard, .cta__card").forEach((el) => {
-      gsap.fromTo(
-        el,
-        { y: 18, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.7,
-          ease: "power2.out",
-          scrollTrigger: { trigger: el, start: "top 86%" },
-        }
-      );
-    });
+    gsap.utils
+      .toArray(".panel, .timeline__item, .gallery__card, .miniCard, .cta__card")
+      .forEach((el) => {
+        gsap.fromTo(
+          el,
+          { y: 18, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: "power2.out",
+            scrollTrigger: { trigger: el, start: "top 86%" },
+          }
+        );
+      });
   }
 
   // Confetti FX
@@ -473,7 +575,10 @@ function setupCookbookBalls() {
   // Optional: tiny initial burst when personalized
   if (!prefersReducedMotion) {
     const qs = getQS();
-    if (qs.get("party") === "1" || (qs.get("to") && !sessionStorage.getItem("partyBurstDone"))) {
+    if (
+      qs.get("party") === "1" ||
+      (qs.get("to") && !sessionStorage.getItem("partyBurstDone"))
+    ) {
       sessionStorage.setItem("partyBurstDone", "1");
       setTimeout(() => burst(), 650);
     }
@@ -481,18 +586,18 @@ function setupCookbookBalls() {
 
   // tiny toast
 
-let toastEl;
-function toast(msg) {
-  if (!toastEl) {
-    toastEl = document.createElement("div");
-    toastEl.className = "toast";
-    document.body.appendChild(toastEl);
+  let toastEl;
+  function toast(msg) {
+    if (!toastEl) {
+      toastEl = document.createElement("div");
+      toastEl.className = "toast";
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    toastEl.classList.add("is-show");
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => {
+      toastEl.classList.remove("is-show");
+    }, 1400);
   }
-  toastEl.textContent = msg;
-  toastEl.classList.add("is-show");
-  clearTimeout(toastEl._t);
-  toastEl._t = setTimeout(() => {
-    toastEl.classList.remove("is-show");
-  }, 1400);
-}
 })();

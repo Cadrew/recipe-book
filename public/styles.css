@@ -1576,3 +1576,95 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+.rnav {
+  position: sticky; /* keep it above the stage when scrolling on small screens */
+  top: 0;
+  z-index: 120;
+}
+
+/* Allow the center brand to shrink instead of forcing overflow */
+.rnav__brand {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.rnav__actions,
+.rnav__back {
+  flex: 0 0 auto;
+}
+
+.rnav__brand .rnav__title,
+.rnav__brand .rnav__sub {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ensure the dropdown is always above the book/stage */
+.lang__menu {
+  z-index: 220;
+}
+
+/* Mobile: make the bar wrap nicely instead of overflowing */
+@media (max-width: 520px) {
+  .rnav {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 10px 10px;
+  }
+
+  /* First row: back + actions; second row: brand */
+  .rnav__brand {
+    order: 3;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  /* Back button becomes icon-only */
+  .rnav__back span {
+    display: none;
+  }
+
+  .rnav__actions {
+    gap: 8px;
+  }
+
+  /* Language button: compact */
+  .lang__btn {
+    gap: 8px;
+    padding: 10px 10px;
+  }
+  .lang__btn i.fa-globe,
+  .lang__btn i.fa-chevron-down {
+    display: none;
+  }
+}
+
+/* =======================================================================
+   Perf mobile: lighten heavy background compositing
+   ======================================================================= */
+@media (max-width: 768px), (pointer: coarse) {
+  .bg__orbs {
+    animation: none !important;
+    opacity: 0.16;
+    filter: blur(80px);
+  }
+
+  .ball {
+    mix-blend-mode: normal;
+    filter: saturate(1.06);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .bg__noise {
+    opacity: 0.07;
+  }
+}
+
+/* If JS toggles "is-lite" (used by main.js patch) */
+.bg__balls.is-lite .ball {
+  mix-blend-mode: normal;
+}
