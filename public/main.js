@@ -13,6 +13,121 @@
     history.replaceState(null, "", u.pathname + u.search + u.hash);
   }
 
+
+// Decorative "color balls" background (book-inspired)
+function setupCookbookBalls() {
+  const root = document.getElementById("bgBalls") || (() => {
+    // Fallback (in case markup was removed): inject the scroll-flowing layer right
+    // after the fixed background.
+    const bg = document.querySelector(".bg");
+    const div = document.createElement("div");
+    div.className = "bg__balls bg__balls--flow";
+    div.id = "bgBalls";
+    div.setAttribute("aria-hidden", "true");
+    if (bg && bg.parentNode) {
+      bg.parentNode.insertBefore(div, bg.nextSibling);
+    } else {
+      document.body.appendChild(div);
+    }
+    return div;
+  })();
+
+  if (!root) return;
+
+  const palette = [
+    ["rgba(255,122,73,0.95)", "rgba(202,161,92,0.75)"], // tomato -> brass
+    ["rgba(111,125,75,0.85)", "rgba(202,161,92,0.55)"], // sage -> brass
+    ["rgba(162,78,122,0.78)", "rgba(255,122,73,0.55)"], // berry -> tomato
+    ["rgba(202,161,92,0.80)", "rgba(245,241,232,0.20)"], // brass -> cream
+  ];
+
+  const balls = [];
+
+  function getDocHeight() {
+    const b = document.body;
+    const e = document.documentElement;
+    return Math.max(
+      b?.scrollHeight || 0,
+      b?.offsetHeight || 0,
+      e?.scrollHeight || 0,
+      e?.offsetHeight || 0,
+      e?.clientHeight || 0
+    );
+  }
+
+  function rebuildBalls() {
+    const docH = getDocHeight();
+    // Ensure the layer spans the whole scrollable document.
+    root.style.height = `${docH}px`;
+    root.textContent = "";
+    balls.length = 0;
+
+    const screens = Math.max(1, Math.ceil(docH / Math.max(1, window.innerHeight)));
+    const perScreen = window.innerWidth < 520 ? 5 : 7;
+    const count = Math.min(64, Math.max(18, screens * perScreen));
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("div");
+      el.className = "ball";
+      const [c1, c2] = palette[i % palette.length];
+
+      const side = Math.random() < 0.5 ? "left" : "right";
+      const x = side === "left" ? (-5 + Math.random() * 22) : (105 - Math.random() * 22); // hug edges
+
+      // Stratified distribution so you discover new balls as you scroll.
+      const t = (i + Math.random()) / count;
+      const y = 90 + t * Math.max(0, docH - 180);
+
+      const s = 90 + Math.random() * 240;
+
+      el.style.setProperty("--x", `${x.toFixed(2)}vw`);
+      el.style.setProperty("--y", `${y.toFixed(0)}px`);
+      el.style.setProperty("--s", `${s.toFixed(0)}px`);
+      el.style.setProperty("--c1", c1);
+      el.style.setProperty("--c2", c2);
+      el.style.setProperty("--a", (0.11 + Math.random() * 0.16).toFixed(2));
+      // Faster + wider wandering so they feel more "alive".
+      el.style.setProperty("--d", `${(8 + Math.random() * 10).toFixed(2)}s`);
+      el.style.setProperty("--delay", `${(-Math.random() * 10).toFixed(2)}s`);
+      el.style.setProperty("--mx", `${(-44 + Math.random() * 88).toFixed(0)}px`);
+      el.style.setProperty("--my", `${(-84 + Math.random() * 168).toFixed(0)}px`);
+
+      root.appendChild(el);
+      balls.push(el);
+    }
+  }
+
+  rebuildBalls();
+
+  // Keep in sync with viewport changes and late-loading assets.
+  let resizeT = 0;
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resizeT);
+    resizeT = window.setTimeout(rebuildBalls, 160);
+  }, { passive: true });
+  window.addEventListener("load", () => window.setTimeout(rebuildBalls, 50), { once: true });
+
+  if (prefersReducedMotion) return;
+
+  // Tiny parallax that makes the balls feel "alive"
+  let tx = 0, ty = 0, px = 0, py = 0;
+  window.addEventListener("pointermove", (e) => {
+    tx = (e.clientX / window.innerWidth) - 0.5;
+    ty = (e.clientY / window.innerHeight) - 0.5;
+  }, { passive: true });
+
+  const tick = () => {
+    px += (tx - px) * 0.08;
+    py += (ty - py) * 0.08;
+    for (let i = 0; i < balls.length; i++) {
+      const depth = (i % 6 + 1) / 6;
+      balls[i].style.setProperty("--px", `${(px * depth * 22).toFixed(2)}px`);
+      balls[i].style.setProperty("--py", `${(py * depth * 16).toFixed(2)}px`);
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
   function updateProgressLabel() {
     const el = document.getElementById("progressLabel");
     if (!el || !i18n) return;
@@ -65,12 +180,16 @@
   updateProgressLabel();
   applyPersonalization();
 
+  setupCookbookBalls();
+
   // Re-apply dynamic strings on language change
   window.addEventListener("langchange", () => {
     // i18n already updated the DOM strings; we update dynamic ones + derived
     updateReaderLinks();
     updateProgressLabel();
     applyPersonalization();
+
+  setupCookbookBalls();
   });
 
   // Remove loading veil
@@ -361,34 +480,19 @@
   }
 
   // tiny toast
-  let toastEl;
-  function toast(msg) {
-    if (!toastEl) {
-      toastEl = document.createElement("div");
-      toastEl.style.position = "fixed";
-      toastEl.style.left = "50%";
-      toastEl.style.bottom = "18px";
-      toastEl.style.transform = "translateX(-50%)";
-      toastEl.style.padding = "10px 12px";
-      toastEl.style.borderRadius = "999px";
-      toastEl.style.border = "1px solid rgba(255,255,255,.14)";
-      toastEl.style.background = "rgba(7,10,18,.55)";
-      toastEl.style.backdropFilter = "blur(10px)";
-      toastEl.style.boxShadow = "0 18px 55px rgba(0,0,0,.35)";
-      toastEl.style.color = "rgba(255,255,255,.92)";
-      toastEl.style.fontSize = ".95rem";
-      toastEl.style.zIndex = "120";
-      toastEl.style.opacity = "0";
-      toastEl.style.transition = "opacity .18s ease, transform .18s ease";
-      document.body.appendChild(toastEl);
-    }
-    toastEl.textContent = msg;
-    toastEl.style.opacity = "1";
-    toastEl.style.transform = "translateX(-50%) translateY(0)";
-    clearTimeout(toastEl._t);
-    toastEl._t = setTimeout(() => {
-      toastEl.style.opacity = "0";
-      toastEl.style.transform = "translateX(-50%) translateY(6px)";
-    }, 1400);
+
+let toastEl;
+function toast(msg) {
+  if (!toastEl) {
+    toastEl = document.createElement("div");
+    toastEl.className = "toast";
+    document.body.appendChild(toastEl);
   }
+  toastEl.textContent = msg;
+  toastEl.classList.add("is-show");
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => {
+    toastEl.classList.remove("is-show");
+  }, 1400);
+}
 })();

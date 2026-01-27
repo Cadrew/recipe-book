@@ -4,7 +4,5 @@ login:
 init:
 	firebase init
 
-deploy-public:
+deploy:
 	firebase deploy --only hosting:mes-recettes-personnelles
-
-deploy: deploy-public

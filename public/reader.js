@@ -39,7 +39,106 @@
     lastFlipAt: 0,
     base: { w: 420, h: 560 },
     renderScale: 1.2,
-  };
+  
+};
+
+  // Persistence (last page / zoom / layout)
+  const STORAGE_KEY = "mpr_reader_state_v1";
+  const qs = new URLSearchParams(location.search);
+
+  function loadSavedState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
+  }
+  const saved = loadSavedState();
+
+  // Prefer ?p= when present, otherwise restore last page.
+  const qsPage = Number(qs.get("p"));
+  state.startIndex =
+    Number.isFinite(qsPage) && qsPage > 0
+      ? qsPage - 1
+      : (Number.isFinite(saved?.pageIndex) ? saved.pageIndex : 0);
+
+  // Restore layout/zoom when not explicitly dictated by URL (future-proof)
+  if (saved && !qs.get("layout") && (saved.layout === "single" || saved.layout === "two")) state.layout = saved.layout;
+  if (saved && !qs.get("zoom") && typeof saved.zoom === "number" && saved.zoom > 0.25 && saved.zoom < 4) state.zoom = saved.zoom;
+
+  let _saveT = null;
+  function scheduleSave() {
+    clearTimeout(_saveT);
+    _saveT = setTimeout(() => {
+      try {
+        const pageIndex = getCurrentIndex();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          pageIndex,
+          zoom: state.zoom,
+          layout: state.layout
+        }));
+      } catch {}
+    }, 250);
+  }
+
+  // Decorative background balls (reader)
+  function setupReaderBalls() {
+    const root = document.getElementById("rbgBalls");
+    if (!root) return;
+
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    const palette = [
+      ["rgba(255,122,73,0.95)", "rgba(202,161,92,0.75)"],
+      ["rgba(111,125,75,0.85)", "rgba(202,161,92,0.55)"],
+      ["rgba(162,78,122,0.78)", "rgba(255,122,73,0.55)"],
+      ["rgba(202,161,92,0.80)", "rgba(245,241,232,0.20)"],
+    ];
+
+    const count = Math.min(10, Math.max(6, Math.round((window.innerWidth || 1200) / 220)));
+    const balls = [];
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("div");
+      el.className = "ball";
+      const [c1, c2] = palette[i % palette.length];
+
+      const side = Math.random() < 0.5 ? "left" : "right";
+      const x = side === "left" ? (-6 + Math.random() * 22) : (106 - Math.random() * 22);
+      const y = 8 + Math.random() * 84;
+      const s = 110 + Math.random() * 240;
+
+      el.style.setProperty("--x", `${x.toFixed(2)}vw`);
+      el.style.setProperty("--y", `${y.toFixed(2)}vh`);
+      el.style.setProperty("--s", `${s.toFixed(0)}px`);
+      el.style.setProperty("--c1", c1);
+      el.style.setProperty("--c2", c2);
+      el.style.setProperty("--a", (0.10 + Math.random() * 0.14).toFixed(2));
+      el.style.setProperty("--d", `${(14 + Math.random() * 14).toFixed(2)}s`);
+      el.style.setProperty("--delay", `${(-Math.random() * 10).toFixed(2)}s`);
+      el.style.setProperty("--mx", `${(-14 + Math.random() * 28).toFixed(0)}px`);
+      el.style.setProperty("--my", `${(-20 + Math.random() * 40).toFixed(0)}px`);
+      root.appendChild(el);
+      balls.push(el);
+    }
+
+    if (prefersReducedMotion) return;
+
+    let tx = 0, ty = 0, px = 0, py = 0;
+    window.addEventListener("pointermove", (e) => {
+      tx = (e.clientX / window.innerWidth) - 0.5;
+      ty = (e.clientY / window.innerHeight) - 0.5;
+    }, { passive: true });
+
+    const tick = () => {
+      px += (tx - px) * 0.08;
+      py += (ty - py) * 0.08;
+      for (let i = 0; i < balls.length; i++) {
+        const depth = (i % 6 + 1) / 6;
+        balls[i].style.setProperty("--px", `${(px * depth * 20).toFixed(2)}px`);
+        balls[i].style.setProperty("--py", `${(py * depth * 14).toFixed(2)}px`);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  setupReaderBalls();
 
   // --- Helpers ---
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -145,9 +244,10 @@
     try {
       if (state.pageFlip && state.pageFlip.getCurrentPageIndex) return state.pageFlip.getCurrentPageIndex();
     } catch {}
-    // fallback: parse from input
+    // fallback: restore or parse from input
     const n = Number(pageInput?.value || 1);
-    return clamp((Number.isFinite(n) ? n : 1) - 1, 0, Math.max(0, state.total - 1));
+    const fallback = Number.isFinite(state.startIndex) ? state.startIndex : ((Number.isFinite(n) ? n : 1) - 1);
+    return clamp(fallback, 0, Math.max(0, state.total - 1));
   }
 
   function goTo(idx) {
@@ -174,6 +274,7 @@
     const t = i18n()?.t;
     if (modeLabelEl) modeLabelEl.textContent = t ? t(layout === "single" ? "reader.mode.single" : "reader.mode.two") : (layout === "single" ? "Single page" : "Two-page");
     if (layoutLabel) layoutLabel.textContent = t ? t(layout === "single" ? "reader.toggleLabel.two" : "reader.toggleLabel.single") : (layout === "single" ? "Two-page" : "Single page");
+    scheduleSave();
   }
 
   function bindPageFlipEvents(pf) {

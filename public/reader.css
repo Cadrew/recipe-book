@@ -346,8 +346,19 @@ a{color:inherit; text-decoration:none}
 .lang__item:hover{background: rgba(255,255,255,.08)}
 .lang__item.is-active{background: rgba(255,122,73,.14); border: 1px solid rgba(255,122,73,.18)}
 
-.side__block{padding: 14px; border-radius: var(--r-xl); border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03)}
-.side{display:grid; gap: 14px; align-content:start; overflow:auto; padding: 0}
+.side__block{
+  /* Keep the left panel visually unified: blocks don't get their own background. */
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+}
+.side__block + .side__block{
+  margin-top: 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+.side{display:grid; gap: 14px; align-content:start; overflow:auto; padding: 14px}
 .side__title{
   display:flex; align-items:center; gap: 10px;
   font-family: Cinzel, serif;
@@ -401,4 +412,82 @@ body.layout-two .bookWrap{max-width: min(96vw, 1240px); margin: 0 auto}
   .reader{grid-template-columns: 1fr; height:auto}
   .side{order:2}
   .stage{order:1; min-height: 70vh}
+}
+
+/* =======================================================================
+   COOKBOOK UI REFACTOR (reader override)
+   - Adds background "color balls" + warmer desk vibe
+   ======================================================================= */
+
+.rbg__grid{
+  position:absolute;
+  inset:-1px;
+  opacity:.18;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(245,241,232,0.045) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(0deg, rgba(245,241,232,0.025) 0 1px, transparent 1px 26px),
+    radial-gradient(circle at 18px 16px, rgba(255,122,73,0.16) 1.0px, transparent 1.1px),
+    radial-gradient(circle at 62px 46px, rgba(202,161,92,0.14) 1.0px, transparent 1.1px),
+    radial-gradient(circle at 98px 26px, rgba(245,241,232,0.10) 1.0px, transparent 1.1px);
+  background-size: 260px 260px, 320px 320px, 140px 140px, 190px 190px, 210px 210px;
+  mix-blend-mode: overlay;
+}
+
+.rbg__balls{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+
+.rbg__balls .ball{
+  position:absolute;
+  left: var(--x, 50vw);
+  top: var(--y, 50vh);
+  width: var(--s, 180px);
+  height: var(--s, 180px);
+  border-radius: 999px;
+  transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px));
+  background:
+    radial-gradient(circle at 28% 24%, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0) 42%),
+    radial-gradient(circle at 60% 64%, var(--c1, rgba(255,122,73,0.85)) 0%, var(--c2, rgba(202,161,92,0.65)) 62%, rgba(0,0,0,0) 100%);
+  opacity: var(--a, .16);
+  filter: saturate(1.18);
+  box-shadow:
+    0 30px 90px rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.10);
+  mix-blend-mode: screen;
+  animation: rballFloat var(--d, 16s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes rballFloat{
+  0%,100%{ transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) translate(0,0) rotate(0.001deg) }
+  50%{ transform: translate(-50%, -50%) translate(var(--px, 0px), var(--py, 0px)) translate(var(--mx, 16px), var(--my, -18px)) rotate(0.001deg) }
+}
+@media (prefers-reduced-motion: reduce){
+  .rbg__balls .ball{ animation:none !important; }
+}
+
+/* A bit more "desk / atelier": stronger brass edges and softer paper */
+.rnav{
+  border-bottom: 1px solid rgba(202,161,92,0.18);
+  background: linear-gradient(180deg, rgba(12,10,8,0.84), rgba(12,10,8,0.60));
+}
+
+.side{
+  border-color: rgba(202,161,92,0.16);
+  background: linear-gradient(180deg, rgba(245,241,232,0.07), rgba(7,10,18,0.52));
+}
+.side__block{background: transparent}
+.side__block + .side__block{border-top-color: rgba(202,161,92,0.12)}
+.metaRow{
+  border-color: rgba(202,161,92,0.14);
+  background: rgba(245,241,232,0.04);
+}
+
+.stage{
+  border-color: rgba(202,161,92,0.16);
+  background:
+    radial-gradient(900px 600px at 18% 18%, rgba(255,122,73,0.10) 0%, rgba(255,122,73,0) 62%),
+    radial-gradient(900px 600px at 82% 28%, rgba(202,161,92,0.08) 0%, rgba(202,161,92,0) 62%),
+    rgba(245,241,232,0.03);
 }
