@@ -128,7 +128,7 @@
       "reader.zoomInTitle": "Zoom in",
       "reader.fullscreenTitle": "Fullscreen",
       "reader.hint":
-        "Tips: ← → • click a corner • double-click to zoom • if single-page doesn’t feel right, switch back to two-page.",
+        "Tips: ← → • click a corner • double-click to zoom.",
       "reader.info": "Info",
       "reader.info.pages": "Pages",
       "reader.info.mode": "Mode",
@@ -148,7 +148,7 @@
     },
 
     fr: {
-      "meta.index.title": "Mes recettes personnelles — Bon anniversaire",
+      "meta.index.title": "Mes recettes personnelles — Joyeux anniversaire",
       "meta.index.description":
         "Une page cadeau (style landing/portfolio) + un lecteur pour feuilleter le livre de recettes (PDF).",
       "meta.reader.title": "Lecture — Mes recettes personnelles",
@@ -181,7 +181,7 @@
       "qr.error": "Impossible de générer le QR code.",
 
       "index.hero.kicker": "Un cadeau maison — en avance",
-      "index.hero.toDefault": "Bon anniversaire",
+      "index.hero.toDefault": "Joyeux anniversaire",
       "index.hero.lead":
         "J’ai écrit un petit livre avec <strong>mes recettes préférées</strong> — celles que je refais tout le temps, du comfort food aux desserts “wow”.",
       "index.hero.note":
@@ -206,7 +206,7 @@
       "index.about.noteTitle": "Teasing “imprimeur”",
       "index.about.noteText": "Le PDF est déjà là. Le papier arrive bientôt (promis). 😄",
 
-      "index.quote.title": "Bon anniversaire !",
+      "index.quote.title": "Joyeux anniversaire !",
       "index.quote.sig": "— signé : moi 😇",
       "index.actions.copy": "Copier le lien",
       "index.actions.qr": "QR code",
@@ -243,9 +243,9 @@
       "index.footer.text": "Fait avec ❤️, du beurre, et un peu trop d’obsession pour les détails.",
       "index.footer.toTop": "Retour en haut",
 
-      "dyn.heroTo": ({ name }) => `Bon anniversaire${name ? " " + name : ""}`,
+      "dyn.heroTo": ({ name }) => `Joyeux anniversaire${name ? " " + name : ""}`,
       "dyn.giftText": ({ name }) =>
-        `J’espère que ce livre te donnera envie de cuisiner des trucs bons, simples, et un peu dangereux. Et surtout : qu’on en fasse ensemble.${name ? " Bon anniversaire " + name + " 💛" : ""}`,
+        `J’espère que ce livre te donnera envie de cuisiner des trucs bons, simples, et un peu dangereux. Et surtout : qu’on en fasse ensemble.${name ? " Joyeux anniversaire " + name + " 💛" : ""}`,
 
       "reader.back": "Retour",
       "reader.subtitle": "Lecteur",
@@ -261,7 +261,7 @@
       "reader.zoomInTitle": "Zoom +",
       "reader.fullscreenTitle": "Plein écran",
       "reader.hint":
-        "Astuces : ← → • clique sur un coin • double-clic pour zoom • si le mode 1 page ne te convient pas, repasse en double page.",
+        "Astuces : ← → • clique sur un coin • double-clic pour zoom.",
       "reader.info": "Info",
       "reader.info.pages": "Pages",
       "reader.info.mode": "Mode",
@@ -276,7 +276,7 @@
       // Toasts
       "toast.linkCopied": "Lien copié ✨",
       "toast.copyFailed": "Copie impossible (navigateur).",
-      "toast.bday": "✨ Bon anniversaire !",
+      "toast.bday": "✨ Joyeux anniversaire !",
 
     },
 
@@ -394,7 +394,7 @@
       "reader.zoomInTitle": "Zoom ind",
       "reader.fullscreenTitle": "Fuld skærm",
       "reader.hint":
-        "Tips: ← → • klik på et hjørne • dobbeltklik for zoom • hvis enkelt-side ikke føles rigtigt, så skift tilbage til to-sidet.",
+        "Tips: ← → • klik på et hjørne • dobbeltklik for zoom.",
       "reader.info": "Info",
       "reader.info.pages": "Sider",
       "reader.info.mode": "Visning",

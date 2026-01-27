@@ -25,7 +25,7 @@
   const totalPagesEl = $("totalPages");
   const modeLabelEl = $("modeLabel");
   const backLink = $("backLink");
-  const openGallery = $("openGallery");
+  const openGallery = $("openFromIndex");
 
   // State
   const state = {
@@ -251,7 +251,17 @@
 
     const idx = keepPage ? getCurrentIndex() : 0;
 
+    // Cache current rendered pages BEFORE destroying PageFlip.
+    // PageFlip.destroy() may clear the container, which would make the book disappear on layout toggle.
+    const cachedPages = Array.from(bookEl.querySelectorAll(".page"));
+
     destroyPageFlip();
+
+    // Restore the rendered pages (if destroy() cleared or re-wrapped them)
+    if (cachedPages.length) {
+      bookEl.innerHTML = "";
+      for (const p of cachedPages) bookEl.appendChild(p);
+    }
 
     // Create new instance
     const settings = buildSettings();
